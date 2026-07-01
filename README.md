@@ -1,73 +1,73 @@
-# TriCLI Remote
+# Orbix
 
-TriCLI Remote is a self-hosted Web + Android remote-control plane for **Codex**, **Claude Code**, and **Cursor Agent**. It controls the same persistent tmux sessions used by `codex-work`, `claude-work`, and `cursor-work`, so AI CLI work keeps running even when the browser, mobile app, relay, or SSH client disconnects.
+Orbix is a self-hosted Web + Android remote-control plane for **Codex**, **Claude Code**, and **Cursor Agent**. It controls the same persistent tmux sessions used by `codex-work`, `claude-work`, and `cursor-work`, so work continues after the browser, phone, relay, or SSH session disconnects.
 
-## What is included
+## Features
 
-- **One platform, three CLIs**: Codex, Claude Code, Cursor Agent provider tabs and adapters.
-- **Web controller**: dark rounded black/gray UI, mobile-first layout, machine picker, live terminal snapshots, prompt composer, hotkeys, uploads, approval center, CLI jobs, and structured turns.
-- **Android controller**: Expo/React Native native UI for direct daemon or relay machines, provider switching, prompt send, hotkeys, uploads, approvals, structured turns, and CLI jobs.
-- **Local daemon**: owns tmux sessions, uploads, background monitoring, event history, approvals, jobs, and structured adapter processes.
-- **Public relay server**: web hosting, machine registration, reverse polling relay for computers without public IP, notification records, and optional webhook dispatch.
-- **Structured adapters**:
-  - Codex: `codex app-server --stdio` JSON-RPC.
-  - Claude: `claude --print --output-format stream-json`.
-  - Cursor: `cursor-agent -p --output-format stream-json --trust`.
-- **Raw CLI parity fallback**: arbitrary key/text input to tmux plus `POST /api/jobs` for CLI subcommands.
-- **Uploads**: browser/mobile files are saved on the target machine and the resulting local path can be sent to the selected CLI.
-- **Single-user token**: set `TRICLI_TOKEN` to protect daemon/server APIs.
+- **One platform, three CLIs**: Codex, Claude Code, and Cursor Agent with persistent tmux-backed control.
+- **Separate Web pages**: Workspaces, Session, New Task, Files & media, Terminal, and Settings.
+- **Separate App pages**: mobile Workspaces, Session, New, Files, Terminal, and Settings with bottom navigation.
+- **Monochrome UI**: black/white/gray main palette; green/red only for diff; light blue only for small special-mode badges.
+- **Theme modes**: light, dark, and follow-system on Web and Android.
+- **Uploads**: send images/files to the controlled machine and pass returned paths to the active CLI.
+- **Approvals + jobs + structured turns**: handle approvals, run CLI subcommands, and inspect structured Codex/Claude/Cursor turns.
+- **Relay or direct**: direct LAN daemon control or public-server relay for machines without public IP.
 
 ## Quick start
 
 ```bash
-cd /root/tricli-remote
-tricli-server --host 0.0.0.0 --port 7320
-tricli-daemon --host 0.0.0.0 --port 7317
+cd /root/orbix
+npm install
+npm run build:web
+npm run install:work-commands
+orbix-server --host 0.0.0.0 --port 7320
+orbix-daemon --host 0.0.0.0 --port 7317
 ```
 
-Open:
+Open the Web UI:
 
 ```text
 http://SERVER:7320
+# or, behind a reverse proxy path:
+http://SERVER/orbix/
 ```
 
-For same-LAN direct control, enter the target daemon URL in the Web UI:
+For same-LAN direct control, enter the target daemon URL in Settings:
 
 ```text
 http://COMPUTER_LAN_IP:7317
 ```
 
-For cross-network control when the target computer has no public IP, run the daemon in polling relay mode:
+For cross-network relay:
 
 ```bash
-tricli-daemon \
+orbix-daemon \
   --host 127.0.0.1 \
   --port 7317 \
   --server-url http://PUBLIC_SERVER:7320 \
   --machine-id my-pc
 ```
 
-Then open the public server Web UI and choose `my-pc` from the machine list.
+Then choose `my-pc` in Orbix Workspaces or Settings.
 
-## Existing work commands remain the source of truth
+## Token protection
 
-Install/refresh the command adapters:
+Set the same token on the server and daemon:
+
+```bash
+export ORBIX_TOKEN='change-me-long-random-token'
+```
+
+Clients send `Authorization: Bearer <token>` and `x-orbix-token: <token>`.
+
+## Work commands
 
 ```bash
 npm run install:work-commands
-# or
-tricli-remote install-work-commands
+# installs: orbix, orbix-server, orbix-daemon, ai-work, codex-work, claude-work, cursor-work
 ```
 
-Then use the shortcuts:
-
-```bash
-codex-work
-claude-work
-cursor-work
-```
-
-TriCLI uses the same tmux sessions non-interactively:
+Manual control remains available:
 
 ```bash
 ai-work ensure codex --cwd /root
@@ -76,112 +76,73 @@ ai-work capture codex 120
 ai-work keys codex C-c
 ```
 
-Fixed tmux sessions:
+| Provider | tmux session | Human command |
+|---|---:|---|
+| Codex | `ai-codex` | `codex-work` |
+| Claude Code | `ai-claude` | `claude-work` |
+| Cursor Agent | `ai-cursor` | `cursor-work` |
 
-| Provider | tmux session | Human command | Remote command |
-|---|---:|---|---|
-| Codex | `ai-codex` | `codex-work` | `ai-work ... codex` |
-| Claude Code | `ai-claude` | `claude-work` | `ai-work ... claude` |
-| Cursor Agent | `ai-cursor` | `cursor-work` | `ai-work ... cursor` |
+## Android release APK
 
-## Structured turn examples
+Android release builds are intentionally done in **GitHub Actions only**. Do not run local Gradle/Expo native Android builds on small servers.
 
-```bash
-curl -X POST http://127.0.0.1:7317/api/structured/codex/turn \
-  -H 'content-type: application/json' \
-  --data '{"prompt":"Reply exactly TRI_OK","cwd":"/root","timeoutMs":60000}'
+The workflow `.github/workflows/android-release.yml` builds a signed release APK on tags matching `v*` or manual dispatch.
 
-curl -X POST http://127.0.0.1:7317/api/structured/claude/turn \
-  -H 'content-type: application/json' \
-  --data '{"prompt":"Reply exactly TRI_CLAUDE_OK","cwd":"/root","permissionMode":"plan"}'
-
-curl -X POST http://127.0.0.1:7317/api/structured/cursor/turn \
-  -H 'content-type: application/json' \
-  --data '{"prompt":"Reply exactly TRI_CURSOR_OK","cwd":"/root","mode":"ask"}'
-```
-
-Each call returns immediately with a daemon-owned turn id. Reconnect later and inspect:
-
-```bash
-curl http://127.0.0.1:7317/api/structured/cursor/turns
-```
-
-
-## GitHub Actions Android Release APK
-
-The repository includes `.github/workflows/android-release.yml`. It builds a signed **release APK** on every tag matching `v*` and uploads it to the GitHub Release.
-
-Before the first release, add these GitHub repository secrets:
+Required GitHub secrets:
 
 | Secret | Meaning |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | Base64 of your Android JKS/keystore file |
+| `ANDROID_KEYSTORE_BASE64` | Base64 JKS/keystore |
 | `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
 | `ANDROID_KEY_ALIAS` | Key alias |
 | `ANDROID_KEY_PASSWORD` | Key password |
 
-Generate a keystore if you do not already have one:
-
-```bash
-keytool -genkeypair -v   -keystore tricli-release.keystore   -alias tricli   -keyalg RSA -keysize 2048 -validity 10000
-base64 -w0 tricli-release.keystore
-```
-
-Create a release build by pushing a tag:
+Create a release:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The APK will appear under the GitHub Release assets. Keep the keystore and passwords safe; future app updates must use the same signing key.
+The release asset is named `orbix-v*.apk`.
 
-## Android
-
-```bash
-cd /root/tricli-remote/apps/mobile
-npm install
-npm run start
-# or
-npm run android
-```
-
-The Android app is a native React Native/Expo controller. Use a reachable URL from the phone/emulator:
-
-- Emulator to host: often `http://10.0.2.2:7317` for daemon or `http://10.0.2.2:7320` for server.
-- Physical phone: use LAN IP or public relay URL.
-
-## Service install
-
-Install safe localhost-default systemd units:
+## Systemd deployment
 
 ```bash
-tricli-remote install-services
-# edit /etc/tricli-remote.env, set TRICLI_TOKEN, hosts, ports, server URL
-systemctl enable --now tricli-daemon tricli-server
+orbix install-services
+sudo editor /etc/orbix.env
+sudo systemctl enable --now orbix-server orbix-daemon
 ```
 
-Use `TRICLI_MONITOR_INTERVAL_MS=5000` (default) so daemon keeps syncing tmux state and detecting approvals even with no connected controller.
+Minimal `/etc/orbix.env`:
 
-## Verification
+```env
+ORBIX_TOKEN=change-me
+ORBIX_SERVER_HOST=0.0.0.0
+ORBIX_SERVER_PORT=7320
+ORBIX_DAEMON_HOST=127.0.0.1
+ORBIX_DAEMON_PORT=7317
+ORBIX_SERVER_URL=http://127.0.0.1:7320
+ORBIX_MACHINE_ID=this-server
+```
+
+## Checks
+
+Safe local checks, no Android native build:
 
 ```bash
-npm run check:all
+npm run check:syntax
+npm test
+npm run check:web
+npm run check:mobile
+npm run smoke
 ```
 
-This runs Node syntax checks, unit tests, Android TypeScript checks, and the server/daemon relay smoke test.
-
-Additional real smoke already verified in this environment:
-
-- Codex app-server structured turn returned `TRI_OK`.
-- Cursor stream-json structured turn returned `TRI_CURSOR_OK` and persisted the Cursor session id.
-- Claude stream-json adapter initialized and persisted stream events; the local account returned a rate-limit response during real model output.
-
-## Documentation
+## Docs
 
 - `docs/architecture.md` — runtime components and APIs.
+- `docs/deployment.md` — LAN, relay, token, and systemd deployment.
 - `docs/work-commands.md` — tmux/session compatibility contract.
-- `docs/notifications.md` — notification and push strategy.
-- `docs/deployment.md` — LAN, relay, HTTPS/Caddy, token, and systemd deployment.
-- `docs/reference-analysis.md` — notes from remote Codex, VibeBridge, Cyborg/Paseo, and HappyClaw references.
-- `design-system/tricli-remote/MASTER.md` — UI/UX design system generated with `ui-ux-pro-max`.
+- `docs/notifications.md` — notification strategy.
+- `docs/reference-analysis.md` — notes from Paseo/Happy/HAPI style references.
+- `design-system/orbix/MASTER.md` — Orbix UI rules from Open Design MCP and `ui-ux-pro-max`.

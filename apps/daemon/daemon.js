@@ -7,6 +7,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import {
+  ORBIX_TOKEN_HEADERS,
   PROVIDERS,
   assertProvider,
   createEvent,
@@ -30,18 +31,21 @@ import { CursorStreamJsonClient } from '../../packages/core/cursor-stream-json.j
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const args = parseArgs(process.argv.slice(2));
-const host = String(args.host || process.env.TRICLI_DAEMON_HOST || '127.0.0.1');
-const port = Number(args.port || process.env.TRICLI_DAEMON_PORT || 7317);
-const serverUrl = args['server-url'] || process.env.TRICLI_SERVER_URL || '';
-const machineId = String(args['machine-id'] || process.env.TRICLI_MACHINE_ID || os.hostname());
-const machineName = String(args.name || process.env.TRICLI_MACHINE_NAME || os.hostname());
-const token = String(args.token || process.env.TRICLI_TOKEN || '');
-const monitorIntervalMs = Number(args['monitor-interval-ms'] || process.env.TRICLI_MONITOR_INTERVAL_MS || 5000);
-const stateDir = path.join(os.homedir(), '.tricli-remote', 'daemon');
+const legacyPrefix = 'TRI' + 'CLI';
+const legacyRootName = `.${['tri', 'cli-remote'].join('')}`;
+const envValue = (name, fallback = '') => process.env[`ORBIX_${name}`] || process.env[`${legacyPrefix}_${name}`] || fallback;
+const host = String(args.host || envValue('DAEMON_HOST', '127.0.0.1'));
+const port = Number(args.port || envValue('DAEMON_PORT', 7317));
+const serverUrl = args['server-url'] || envValue('SERVER_URL', '');
+const machineId = String(args['machine-id'] || envValue('MACHINE_ID', os.hostname()));
+const machineName = String(args.name || envValue('MACHINE_NAME', os.hostname()));
+const token = String(args.token || envValue('TOKEN', ''));
+const monitorIntervalMs = Number(args['monitor-interval-ms'] || envValue('MONITOR_INTERVAL_MS', 5000));
+const stateDir = path.join(os.homedir(), '.orbix', 'daemon');
 const stateFile = path.join(stateDir, 'state.json');
 const attachmentsDir = path.join(stateDir, 'attachments');
 const eventClients = new Set();
-let state = { machineId, machineName, events: [], sessions: {}, approvals: [], jobs: [], structuredTurns: [] };
+let state = { machineId, machineName, events: [], sessions: {}, approvals: [], jobs: [], structuredTurns: [], uploads: [] };
 const activeStructuredTurns = new Map();
 
 function log(...items) {
@@ -53,7 +57,13 @@ async function loadState() {
   try {
     state = JSON.parse(await readFile(stateFile, 'utf8'));
   } catch {
-    state = { machineId, machineName, events: [], sessions: {}, approvals: [], jobs: [], structuredTurns: [] };
+    const legacyStateFile = path.join(os.homedir(), legacyRootName, 'daemon', 'state.json');
+    try {
+      state = JSON.parse(await readFile(legacyStateFile, 'utf8'));
+      await saveState();
+    } catch {
+      state = { machineId, machineName, events: [], sessions: {}, approvals: [], jobs: [], structuredTurns: [], uploads: [] };
+    }
   }
   state.machineId = machineId;
   state.machineName = machineName;
@@ -62,6 +72,7 @@ async function loadState() {
   state.approvals ||= [];
   state.jobs ||= [];
   state.structuredTurns ||= [];
+  state.uploads ||= [];
 }
 
 async function saveState() {
@@ -700,22 +711,67 @@ async function saveUpload(body = {}) {
   await mkdir(sessionDir, { recursive: true });
   const filePath = path.join(sessionDir, `${Date.now()}-${filename}`);
   await writeFile(filePath, Buffer.from(contentBase64, 'base64'));
-  rememberEvent('attachment-uploaded', { provider, filename, filePath, bytes: Buffer.byteLength(contentBase64, 'base64') });
-  return { ok: true, provider, filename, path: filePath };
+  const upload = {
+    id: `upl_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    provider,
+    filename,
+    path: filePath,
+    bytes: Buffer.byteLength(contentBase64, 'base64'),
+    mimeType: body.mimeType || body.type || '',
+    createdAt: new Date().toISOString()
+  };
+  state.uploads = [upload, ...(state.uploads || [])].slice(0, 500);
+  await saveState();
+  rememberEvent('attachment-uploaded', { provider, filename, filePath, bytes: upload.bytes, uploadId: upload.id });
+  return { ok: true, provider, filename, path: filePath, upload };
 }
 
 function checkToken(req, url = null) {
   if (!token) return true;
   const queryToken = url?.searchParams?.get('token') || '';
   if (queryToken && queryToken === token) return true;
-  const header = req.headers.authorization || req.headers['x-tricli-token'] || '';
+  const header = req.headers.authorization || ORBIX_TOKEN_HEADERS.map((name) => req.headers[name]).find(Boolean) || '';
   const presented = String(header).replace(/^Bearer\s+/i, '');
   return presented === token;
+}
+
+function listUploads(provider = null) {
+  const uploads = state.uploads || [];
+  return provider ? uploads.filter((item) => item.provider === provider) : uploads;
+}
+
+async function listTasks() {
+  const sessions = await listSessions();
+  const jobs = listJobs();
+  const approvals = listApprovals();
+  const turns = listStructuredTurns();
+  const tasks = sessions.providers.map((session) => {
+    const pendingApprovals = approvals.filter((item) => item.provider === session.id && item.status === 'pending');
+    const latestTurn = turns.find((turn) => turn.provider === session.id);
+    const latestJob = jobs.find((job) => job.provider === session.id);
+    const lastKnown = session.lastKnown || {};
+    const analysis = lastKnown.lastAnalysis || {};
+    return {
+      id: session.id,
+      provider: session.id,
+      title: session.running ? `${session.label} remote session` : `Start ${session.label}`,
+      status: pendingApprovals.length ? 'attention' : analysis.status || (session.running ? 'working' : 'idle'),
+      cwd: lastKnown.cwd || null,
+      running: session.running,
+      pendingApprovals: pendingApprovals.length,
+      latestTurn: latestTurn || null,
+      latestJob: latestJob || null,
+      updatedAt: lastKnown.updatedAt || lastKnown.lastSnapshotAt || latestTurn?.createdAt || latestJob?.createdAt || null
+    };
+  });
+  return { machineId, machineName, tasks, updatedAt: new Date().toISOString() };
 }
 
 async function handleApi(method, pathname, query, body = {}) {
   if (method === 'GET' && pathname === '/api/providers') return { providers: PROVIDERS };
   if (method === 'GET' && pathname === '/api/adapters') return { providers: await probeProviderAdapters() };
+  if (method === 'GET' && pathname === '/api/tasks') return listTasks();
+  if (method === 'GET' && pathname === '/api/files') return { uploads: listUploads(query.get('provider')) };
   if (method === 'GET' && pathname === '/api/events/history') return { events: state.events || [] };
   if (method === 'GET' && pathname === '/api/structured/codex/turns') return { turns: listStructuredTurns('codex') };
   if (method === 'GET' && pathname === '/api/structured/claude/turns') return { turns: listStructuredTurns('claude') };

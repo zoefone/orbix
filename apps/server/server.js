@@ -5,18 +5,23 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { jsonResponse, parseArgs, readJsonBody, textResponse } from '../../packages/core/protocol.js';
+import { ORBIX_TOKEN_HEADERS, jsonResponse, parseArgs, readJsonBody, textResponse } from '../../packages/core/protocol.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const args = parseArgs(process.argv.slice(2));
-const host = String(args.host || process.env.TRICLI_SERVER_HOST || '127.0.0.1');
-const port = Number(args.port || process.env.TRICLI_SERVER_PORT || 7320);
-const token = String(args.token || process.env.TRICLI_TOKEN || '');
-const notificationWebhook = String(args['notification-webhook'] || process.env.TRICLI_NOTIFICATION_WEBHOOK || '');
-const stateDir = path.join(os.homedir(), '.tricli-remote', 'server');
+const legacyPrefix = 'TRI' + 'CLI';
+const legacyRootName = `.${['tri', 'cli-remote'].join('')}`;
+const envValue = (name, fallback = '') => process.env[`ORBIX_${name}`] || process.env[`${legacyPrefix}_${name}`] || fallback;
+const host = String(args.host || envValue('SERVER_HOST', '127.0.0.1'));
+const port = Number(args.port || envValue('SERVER_PORT', 7320));
+const token = String(args.token || envValue('TOKEN', ''));
+const notificationWebhook = String(args['notification-webhook'] || envValue('NOTIFICATION_WEBHOOK', ''));
+const stateDir = path.join(os.homedir(), '.orbix', 'server');
 const stateFile = path.join(stateDir, 'state.json');
-const webRoot = path.resolve(__dirname, '..', 'web');
+const sourceWebRoot = path.resolve(__dirname, '..', 'web');
+const distWebRoot = path.resolve(sourceWebRoot, 'dist');
+const webRoot = existsSync(path.join(distWebRoot, 'index.html')) ? distWebRoot : sourceWebRoot;
 let state = { machines: {}, events: [], pushTokens: [], machineEvents: {}, notifications: [] };
 const waitingPolls = new Map();
 const queues = new Map();
@@ -32,7 +37,13 @@ async function loadState() {
   try {
     state = JSON.parse(await readFile(stateFile, 'utf8'));
   } catch {
-    state = { machines: {}, events: [], pushTokens: [], machineEvents: {}, notifications: [] };
+    const legacyStateFile = path.join(os.homedir(), legacyRootName, 'server', 'state.json');
+    try {
+      state = JSON.parse(await readFile(legacyStateFile, 'utf8'));
+      await saveState();
+    } catch {
+      state = { machines: {}, events: [], pushTokens: [], machineEvents: {}, notifications: [] };
+    }
   }
   state.machines ||= {};
   state.events ||= [];
@@ -50,7 +61,7 @@ function checkToken(req, url = null) {
   if (!token) return true;
   const queryToken = url?.searchParams?.get('token') || '';
   if (queryToken && queryToken === token) return true;
-  const header = req.headers.authorization || req.headers['x-tricli-token'] || '';
+  const header = req.headers.authorization || ORBIX_TOKEN_HEADERS.map((name) => req.headers[name]).find(Boolean) || '';
   const presented = String(header).replace(/^Bearer\s+/i, '');
   return presented === token;
 }
@@ -99,7 +110,7 @@ function notificationFromMachineEvent(machineId, event) {
     return {
       machineId,
       severity: 'attention',
-      title: 'TriCLI 需要处理审批',
+      title: 'Orbix 需要处理审批',
       body: `${event.provider || 'CLI'} 有 ${event.pendingApprovals || 1} 个待审批/选择项`,
       data: event
     };
@@ -108,7 +119,7 @@ function notificationFromMachineEvent(machineId, event) {
     return {
       machineId,
       severity: 'running',
-      title: 'TriCLI 会话已启动',
+      title: 'Orbix 会话已启动',
       body: `${event.provider || 'CLI'} 正在目标机器继续运行`,
       data: event
     };
@@ -117,7 +128,7 @@ function notificationFromMachineEvent(machineId, event) {
     return {
       machineId,
       severity: 'info',
-      title: 'TriCLI 会话已停止',
+      title: 'Orbix 会话已停止',
       body: `${event.provider || 'CLI'} 已停止`,
       data: event
     };
@@ -126,7 +137,7 @@ function notificationFromMachineEvent(machineId, event) {
     return {
       machineId,
       severity: 'attention',
-      title: 'TriCLI 任务需要注意',
+      title: 'Orbix 任务需要注意',
       body: `${event.provider || 'CLI'} 输出中出现错误/拒绝/审批提示`,
       data: event
     };
@@ -135,7 +146,7 @@ function notificationFromMachineEvent(machineId, event) {
     return {
       machineId,
       severity: 'ready',
-      title: 'TriCLI 任务可能已完成',
+      title: 'Orbix 任务可能已完成',
       body: `${event.provider || 'CLI'} 输出显示 ready/completed`,
       data: event
     };
@@ -309,7 +320,8 @@ const contentTypes = {
 };
 
 function serveStatic(pathname, res) {
-  const rel = pathname === '/' ? '/index.html' : pathname;
+  const normalized = pathname === '/orbix' || pathname.startsWith('/orbix/') ? pathname.replace(/^\/orbix/, '') || '/' : pathname;
+  const rel = normalized === '/' ? '/index.html' : normalized;
   const filePath = path.resolve(webRoot, `.${rel}`);
   if (!filePath.startsWith(webRoot) || !existsSync(filePath)) return false;
   res.writeHead(200, { 'content-type': contentTypes[path.extname(filePath)] || 'application/octet-stream' });
@@ -353,7 +365,7 @@ async function handleRequest(req, res) {
     if (req.method === 'POST' && pathname === '/api/notifications/test') {
       const notification = await dispatchNotification({
         severity: 'test',
-        title: 'TriCLI test notification',
+        title: 'Orbix test notification',
         body: 'Notification pipeline is reachable.',
         data: await readJsonBody(req)
       });

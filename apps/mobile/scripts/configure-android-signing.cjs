@@ -24,16 +24,16 @@ if (missing.length) {
 }
 if (!fs.existsSync(appGradle)) fail(`missing ${appGradle}; run expo prebuild first`);
 
-const keystorePath = path.join(androidDir, 'app', 'tricli-release.keystore');
+const keystorePath = path.join(androidDir, 'app', 'orbix-release.keystore');
 fs.writeFileSync(keystorePath, Buffer.from(process.env.ANDROID_KEYSTORE_BASE64, 'base64'));
-fs.appendFileSync(gradleProps, `\nTRICLI_UPLOAD_STORE_FILE=tricli-release.keystore\nTRICLI_UPLOAD_STORE_PASSWORD=${process.env.ANDROID_KEYSTORE_PASSWORD}\nTRICLI_UPLOAD_KEY_ALIAS=${process.env.ANDROID_KEY_ALIAS}\nTRICLI_UPLOAD_KEY_PASSWORD=${process.env.ANDROID_KEY_PASSWORD}\n`);
+fs.appendFileSync(gradleProps, `\nORBIX_UPLOAD_STORE_FILE=orbix-release.keystore\nORBIX_UPLOAD_STORE_PASSWORD=${process.env.ANDROID_KEYSTORE_PASSWORD}\nORBIX_UPLOAD_KEY_ALIAS=${process.env.ANDROID_KEY_ALIAS}\nORBIX_UPLOAD_KEY_PASSWORD=${process.env.ANDROID_KEY_PASSWORD}\n`);
 
 let text = fs.readFileSync(appGradle, 'utf8');
-if (!text.includes('TRICLI_UPLOAD_STORE_FILE')) {
-  text = text.replace(/signingConfigs\s*\{/, `signingConfigs {\n        tricliRelease {\n            storeFile file(TRICLI_UPLOAD_STORE_FILE)\n            storePassword TRICLI_UPLOAD_STORE_PASSWORD\n            keyAlias TRICLI_UPLOAD_KEY_ALIAS\n            keyPassword TRICLI_UPLOAD_KEY_PASSWORD\n        }`);
-  text = text.replace(/release\s*\{([\s\S]*?)signingConfig\s+signingConfigs\.debug/, 'release {$1signingConfig signingConfigs.tricliRelease');
-  if (!text.includes('signingConfig signingConfigs.tricliRelease')) {
-    text = text.replace(/release\s*\{/, 'release {\n            signingConfig signingConfigs.tricliRelease');
+if (!text.includes('ORBIX_UPLOAD_STORE_FILE')) {
+  text = text.replace(/signingConfigs\s*\{/, `signingConfigs {\n        orbixRelease {\n            storeFile file(ORBIX_UPLOAD_STORE_FILE)\n            storePassword ORBIX_UPLOAD_STORE_PASSWORD\n            keyAlias ORBIX_UPLOAD_KEY_ALIAS\n            keyPassword ORBIX_UPLOAD_KEY_PASSWORD\n        }`);
+  text = text.replace(/release\s*\{([\s\S]*?)signingConfig\s+signingConfigs\.debug/, 'release {$1signingConfig signingConfigs.orbixRelease');
+  if (!text.includes('signingConfig signingConfigs.orbixRelease')) {
+    text = text.replace(/release\s*\{/, 'release {\n            signingConfig signingConfigs.orbixRelease');
   }
   fs.writeFileSync(appGradle, text);
 }

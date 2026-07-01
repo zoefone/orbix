@@ -1,6 +1,6 @@
 # Open-source reference analysis
 
-The following projects were shallow-cloned under `references/` for local analysis and are ignored by `.gitignore` because they are not vendored into TriCLI Remote.
+The following projects were shallow-cloned under `references/` for local analysis and are ignored by `.gitignore` because they are not vendored into Orbix.
 
 ## remote_codex
 
@@ -14,7 +14,7 @@ Useful ideas adopted:
 - Attachments should include images and local/remote file paths and should be forwarded to the agent as concrete filesystem paths.
 - Mobile views need compact runtime chips, reconnectable history, and explicit status feedback.
 
-TriCLI implementation:
+Orbix implementation:
 
 - `apps/server` is the relay/static web entry.
 - `apps/daemon` owns local execution and persistence.
@@ -32,7 +32,7 @@ Useful ideas adopted:
 - The main answer should be easy to read, with raw process/details available on demand.
 - Role/multi-user features can be layered later; start with a single-user token model.
 
-TriCLI implementation:
+Orbix implementation:
 
 - `POST /api/machines/register`, `/api/relay/:machineId/poll`, and `/api/machines/:machineId/daemon/...` provide the Main/Node pattern.
 - Web and Android both expose machine selection.
@@ -49,10 +49,10 @@ Useful ideas adopted:
 - Provider adapters should be pluggable because different CLIs expose different protocols.
 - Offline/reconnect behavior benefits from local state persistence.
 
-TriCLI implementation:
+Orbix implementation:
 
-- Daemon state persists to `~/.tricli-remote/daemon/state.json`.
-- Server state persists to `~/.tricli-remote/server/state.json`.
+- Daemon state persists to `~/.orbix/daemon/state.json`.
+- Server state persists to `~/.orbix/server/state.json`.
 - Adapters live in `packages/core/*` and expose normalized events.
 
 ## HappyClaw
@@ -66,7 +66,7 @@ Useful ideas adopted:
 - Session handoff must support local terminal -> remote controller -> local terminal again.
 - A generic PTY fallback is essential for CLIs without perfect SDK support.
 
-TriCLI implementation:
+Orbix implementation:
 
 - The approval center detects terminal permission/choice prompts and can send approve/deny/Enter keys.
 - `notificationFromMachineEvent` creates server-side notifications directly from daemon events.
@@ -78,4 +78,4 @@ TriCLI implementation:
 2. **Structured when possible, terminal when necessary:** expose app-server/stream-json for rich UX, but keep raw CLI control for full parity.
 3. **Machine-first routing:** direct LAN and relay polling are both normal connection modes.
 4. **Mobile-first operations:** start, send, approve, upload, stop, and inspect must fit on a phone.
-5. **Token-ready but self-hosted:** a single-user `TRICLI_TOKEN` is supported now; roles can be added later.
+5. **Token-ready but self-hosted:** a single-user `ORBIX_TOKEN` is supported now; roles can be added later.

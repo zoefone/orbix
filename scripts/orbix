@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${ORBIX_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+cmd="${1:-help}"
+shift || true
+case "$cmd" in
+  server)
+    exec node "$ROOT/apps/server/server.js" "$@"
+    ;;
+  daemon)
+    exec node "$ROOT/apps/daemon/daemon.js" "$@"
+    ;;
+  install-work-commands)
+    exec bash "$ROOT/scripts/install-work-commands.sh" "$@"
+    ;;
+  install-services)
+    exec bash "$ROOT/scripts/install-systemd.sh" "$@"
+    ;;
+  help|-h|--help)
+    cat <<'HELP'
+Orbix command helper
+
+Usage:
+  orbix server [--host 0.0.0.0 --port 7320]
+  orbix daemon [--host 127.0.0.1 --port 7317]
+  orbix install-work-commands
+  orbix install-services [--enable] [--start]
+
+The raw persistent work commands remain: ai-work, codex-work, claude-work, cursor-work.
+HELP
+    ;;
+  *)
+    echo "Unknown orbix command: $cmd" >&2
+    exit 2
+    ;;
+esac

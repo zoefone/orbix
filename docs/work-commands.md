@@ -5,10 +5,10 @@
 The project now ships the reusable command adapter in `scripts/ai-work` plus an idempotent installer:
 
 ```bash
-cd /root/tricli-remote
+cd /root/orbix
 npm run install:work-commands
 # or
-tricli-remote install-work-commands
+orbix install-work-commands
 ```
 
 It installs/refreshes:
@@ -34,7 +34,7 @@ They attach to fixed tmux sessions:
 | Claude Code | `claude-work` | `ai-claude` | `ai-work ensure/capture/send/keys claude` |
 | Cursor Agent | `cursor-work` | `ai-cursor` | `ai-work ensure/capture/send/keys cursor` |
 
-TriCLI daemon never launches a foreground CLI owned by the Web/App connection. It calls `ai-work ensure PROVIDER` to create a detached tmux session, then uses `capture/send/keys` for control. If the browser, Android app, public server, relay polling loop, SSH connection, or terminal disconnects, the tmux session keeps running.
+Orbix daemon never launches a foreground CLI owned by the Web/App connection. It calls `ai-work ensure PROVIDER` to create a detached tmux session, then uses `capture/send/keys` for control. If the browser, Android app, public server, relay polling loop, SSH connection, or terminal disconnects, the tmux session keeps running.
 
 Manual recovery:
 
@@ -49,7 +49,7 @@ This remains the compatibility contract for long-running interactive work even t
 
 ## Background monitor
 
-The daemon runs a background monitor every `TRICLI_MONITOR_INTERVAL_MS` milliseconds
+The daemon runs a background monitor every `ORBIX_MONITOR_INTERVAL_MS` milliseconds
 (default `5000`). It checks the three provider tmux sessions, captures recent
 output, updates `state.json`, and detects approval/choice prompts even when no
 Web/App client is connected.
@@ -57,6 +57,6 @@ Web/App client is connected.
 Disable or tune it with:
 
 ```bash
-TRICLI_MONITOR_INTERVAL_MS=0 tricli-daemon
-TRICLI_MONITOR_INTERVAL_MS=10000 tricli-daemon
+ORBIX_MONITOR_INTERVAL_MS=0 orbix-daemon
+ORBIX_MONITOR_INTERVAL_MS=10000 orbix-daemon
 ```

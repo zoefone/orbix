@@ -12,11 +12,11 @@ export async function configureNotifications() {
     })
   });
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('tricli-session-status', {
-      name: 'TriCLI session status',
+    await Notifications.setNotificationChannelAsync('orbix-session-status', {
+      name: 'Orbix session status',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 180, 120, 180],
-      lightColor: '#22C55E'
+      lightColor: '#82C7EC'
     });
   }
   return Notifications.requestPermissionsAsync();

@@ -100,7 +100,7 @@ export class CodexAppServerClient extends EventEmitter {
     this.rl = createInterface({ input: this.child.stdout });
     this.rl.on('line', (line) => this.handleLine(line));
     await this.request('initialize', {
-      clientInfo: { name: 'tricli_remote', title: 'TriCLI Remote', version: '0.1.0' },
+      clientInfo: { name: 'orbix_remote', title: 'Orbix', version: '0.1.0' },
       capabilities: { experimentalApi: true }
     });
     this.notify('initialized', {});

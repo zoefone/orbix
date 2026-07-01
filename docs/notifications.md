@@ -35,7 +35,7 @@ For production push delivery, set a webhook endpoint while FCM/vendor push SDKs
 are being integrated:
 
 ```bash
-TRICLI_NOTIFICATION_WEBHOOK=https://push-gateway.example/tri-cli
+ORBIX_NOTIFICATION_WEBHOOK=https://push-gateway.example/orbix
 ```
 
 The webhook receives JSON notification payloads with `title`, `body`,
@@ -44,7 +44,7 @@ providers be swapped without changing daemon behavior.
 
 ## Current Android implementation
 
-`apps/mobile/src/notifications.ts` configures Expo Notifications and creates the Android channel `tricli-session-status`. The native app currently uses local notifications for:
+`apps/mobile/src/notifications.ts` configures Expo Notifications and creates the Android channel `orbix-session-status`. The native app currently uses local notifications for:
 
 - session started / handoff reminder
 - prompt sent
@@ -62,4 +62,4 @@ with a payload such as:
 { "kind": "expo", "platform": "android", "token": "ExponentPushToken[...]" }
 ```
 
-Mainland China fallback remains an adapter point: the server stores notification records and can dispatch to `TRICLI_NOTIFICATION_WEBHOOK`, so a vendor-push gateway can be added without changing daemon event generation.
+Mainland China fallback remains an adapter point: the server stores notification records and can dispatch to `ORBIX_NOTIFICATION_WEBHOOK`, so a vendor-push gateway can be added without changing daemon event generation.

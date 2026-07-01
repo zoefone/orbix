@@ -21,7 +21,7 @@ Shortcuts:
 
 Remote-control note:
   The ensure/capture/send/keys commands are non-interactive and are intended for
-  TriCLI Remote. They use the same tmux sessions as codex-work/claude-work/
+  Orbix. They use the same tmux sessions as codex-work/claude-work/
   cursor-work, so the CLI keeps running even when Web/App clients disconnect.
 USAGE
 }
@@ -96,7 +96,7 @@ switch_or_attach() {
 
 start_detached() {
   local provider="$1"; shift
-  local cwd="${TRICLI_WORK_CWD:-$PWD}"
+  local cwd="${ORBIX_WORK_CWD:-$PWD}"
   if [ "${1:-}" = "--cwd" ]; then
     cwd="$2"
     shift 2

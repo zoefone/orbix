@@ -10,7 +10,7 @@ function sh(command) {
 }
 
 test('ai-work can control a detached tmux session after client disconnect', async () => {
-  const name = `tricli-test-${process.pid}`;
+  const name = `orbix-test-${process.pid}`;
   const script = join(tmpdir(), `${name}.sh`);
   writeFileSync(script, '#!/usr/bin/env bash\necho READY\nwhile IFS= read -r line; do echo "ECHO:${line}"; done\n');
   chmodSync(script, 0o755);

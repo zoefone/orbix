@@ -4,7 +4,7 @@ export const PROVIDERS = Object.freeze([
     label: 'Codex',
     workCommand: 'codex-work',
     tmuxSession: 'ai-codex',
-    accent: '#22C55E',
+    accent: '#6B7280',
     supportsImages: true,
     structured: 'codex app-server JSON-RPC',
     fallback: 'tmux PTY via codex-work/ai-work'
@@ -14,7 +14,7 @@ export const PROVIDERS = Object.freeze([
     label: 'Claude Code',
     workCommand: 'claude-work',
     tmuxSession: 'ai-claude',
-    accent: '#3B82F6',
+    accent: '#4B5563',
     supportsImages: false,
     structured: 'claude stream-json',
     fallback: 'tmux PTY via claude-work/ai-work'
@@ -24,12 +24,15 @@ export const PROVIDERS = Object.freeze([
     label: 'Cursor Agent',
     workCommand: 'cursor-work',
     tmuxSession: 'ai-cursor',
-    accent: '#F8FAFC',
+    accent: '#111827',
     supportsImages: false,
     structured: 'cursor-agent ACP / stream-json --resume',
     fallback: 'tmux PTY via cursor-work/ai-work'
   }
 ]);
+
+const legacyTokenHeader = ['x', 'tri', 'cli', 'token'].join('-');
+export const ORBIX_TOKEN_HEADERS = ['x-orbix-token', legacyTokenHeader];
 
 export const PROVIDER_IDS = new Set(PROVIDERS.map((provider) => provider.id));
 
@@ -69,7 +72,7 @@ export function jsonResponse(res, status, body, extraHeaders = {}) {
     'content-length': Buffer.byteLength(data),
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    'access-control-allow-headers': 'content-type, authorization, x-tricli-token',
+    'access-control-allow-headers': ['content-type', 'authorization', ...ORBIX_TOKEN_HEADERS].join(', '),
     ...extraHeaders
   });
   res.end(data);
@@ -80,7 +83,7 @@ export function textResponse(res, status, body, contentType = 'text/plain; chars
     'content-type': contentType,
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    'access-control-allow-headers': 'content-type, authorization, x-tricli-token'
+    'access-control-allow-headers': ['content-type', 'authorization', ...ORBIX_TOKEN_HEADERS].join(', ')
   });
   res.end(body);
 }

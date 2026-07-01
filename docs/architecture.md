@@ -2,7 +2,7 @@
 
 ## Runtime components
 
-- **Machine daemon** (`apps/daemon`): runs on the controlled computer/server. It manages persistent tmux sessions through `ai-work`, exposes HTTP/SSE APIs, saves uploads locally, and optionally polls a public TriCLI server for relay commands.
+- **Machine daemon** (`apps/daemon`): runs on the controlled computer/server. It manages persistent tmux sessions through `ai-work`, exposes HTTP/SSE APIs, saves uploads locally, and optionally polls a public Orbix server for relay commands.
 - **Public server** (`apps/server`): serves the Web UI, tracks registered machines, proxies direct daemon URLs, and offers a polling relay for machines without a public IP.
 - **Web controller** (`apps/web`): mobile-first dark UI for selecting a machine, switching Codex/Claude/Cursor, sending prompts, viewing terminal snapshots, and uploading files.
 - **Android controller** (`apps/mobile`): React Native/Expo native app with native controls for machine selection, provider switching, prompt send, hotkeys, uploads, approvals, structured turns, and CLI jobs.
@@ -42,7 +42,7 @@ Persistent interactive work still defaults to `work-command` / tmux. One-shot st
 
 ## Approval and attention recovery
 
-The daemon analyzes terminal snapshots for approval/choice/danger markers. Pending items are persisted in `~/.tricli-remote/daemon/state.json` and exposed at:
+The daemon analyzes terminal snapshots for approval/choice/danger markers. Pending items are persisted in `~/.orbix/daemon/state.json` and exposed at:
 
 ```http
 GET  /api/approvals?provider=codex
@@ -127,7 +127,7 @@ claude --print --verbose --output-format stream-json --include-partial-messages 
 ```
 
 It maps `system`, `assistant`, `thinking`, `tool_use`, `tool_result`, and
-`result` stream messages into TriCLI structured events. The returned
+`result` stream messages into Orbix structured events. The returned
 `structuredTurnId` is daemon-owned, so Web/App disconnects do not own or stop the
 process. If Claude reports retries/rate limits, those `system` stream events are
 persisted and visible after reconnect.

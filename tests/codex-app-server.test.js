@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mapCodexAppServerNotification, summarizeCodexEvents } from '../packages/core/codex-app-server.js';
 
-test('maps Codex app-server deltas into TriCLI structured events', () => {
+test('maps Codex app-server deltas into Orbix structured events', () => {
   const event = mapCodexAppServerNotification({
     method: 'item/agentMessage/delta',
     params: { threadId: 'thr', turnId: 'turn', itemId: 'item', delta: 'hello' }
