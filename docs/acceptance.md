@@ -15,7 +15,7 @@
 | 审批和需要用户选择的方案 | 通过 | permission adapters/handlers；`PermissionFooter.tsx`、`AskUserQuestionFooter.tsx` | Codex、Claude、Cursor 权限与 AskQuestion 自动化测试通过；当前本机 Codex 全局 YOLO 配置会自动批准，因此未改动用户全局设置来强制制造审批 |
 | 上传图片和文件 | 通过 | `cli/src/modules/common/handlers/uploads.ts`、`web/src/lib/fileAttachments.ts`、消息附件组件、PWA Share Target | 真实上传、内容一致性检查及删除验证通过；manifest 提供 `/share` Share Target |
 | 文件树和文件查看 | 通过 | `web/src/components/SessionFiles/`、files handler、文件搜索 hooks | Web 自动化测试通过 |
-| 工作时显示通知栏状态 | 通过 | `hub/src/notifications/notificationHub.ts`、`hub/src/push/`、`web/src/sw.ts` | 会话开始发送同 tag 的持续、静默状态通知；相关 Hub/Push 测试通过 |
+| 工作时显示通知栏状态 | 通过 | `hub/src/notifications/notificationHub.ts`、`hub/src/push/`、`web/src/sw.ts` | 会话开始发送同 tag 的持续、静默状态通知；公网 HTTPS 实测 secure context、Service Worker、PushManager、Notification API 均可用 |
 | 完成、失败、审批和选择时弹出通知 | 通过 | 完成通知使用相同 tag 替换工作通知；审批、Ready、失败事件独立通知 | NotificationHub、Push channel、Service Worker 测试通过 |
 | 黑白灰、圆角、美观的图形界面 | 通过 | Orbix 设计 token、全新单色图标、登录页、桌面空状态、会话页和设置页 | 手机 light/dark、桌面 light、登录/sessions/settings 视觉巡检无页面错误；设计基线见 `design-system/orbix-next/MASTER.md` |
 | 深色、浅色和跟随系统 | 通过 | `web/src/hooks/useTheme.ts`；Settings 的 appearance 配置（另含 OLED） | theme 与 theme colors 测试通过，手机 light/dark 实际截图通过 |
@@ -60,7 +60,7 @@ GitHub Actions 工作流：`.github/workflows/ci.yml`。
 7. 4GB V8 heap 的完整 production PWA build；
 8. 上传 `orbix-web` 构建 artifact。
 
-验收时最近的完整成功 run：`29141914948`。本机资源只有约 2C2G，完整 Rollup/Vite production build 明确放在 GitHub Actions 执行，避免突破服务器资源上限。
+验收时最近的完整成功 run：`29153098105`（commit `3b42fe3`）。工作流还会验证 marketing website typecheck、公开发行链接审计以及 website/VitePress production build。本机资源只有约 2C2G，完整 Rollup/Vite production build 明确放在 GitHub Actions 执行，避免突破服务器资源上限。
 
 ## 4. 真实运行验收
 
@@ -68,16 +68,18 @@ GitHub Actions 工作流：`.github/workflows/ci.yml`。
 
 | 服务 | 监听/工作目录 | 资源边界 |
 | --- | --- | --- |
-| `orbix-next-hub.service` | `0.0.0.0:3406` | MemoryHigh 256M、MemoryMax 320M、CPUQuota 60% |
+| `orbix-next-hub.service` | 仅回环 `127.0.0.1:3406`，由 Nginx HTTPS 反代 | MemoryHigh 256M、MemoryMax 320M、CPUQuota 60% |
 | `orbix-next-runner.service` | workspace `/root/orbix-next` | MemoryHigh 650M、MemoryMax 750M、CPUQuota 140% |
 
-当前局域网入口：`http://172.18.6.251:3406`。生产 Web 包来自成功的 GitHub Actions artifact，而不是在受限机器上强行完成大内存构建。
+当前可信 HTTPS 入口：`https://orbix.47.251.191.185.sslip.io`。HTTP 自动 301 到 HTTPS；Let's Encrypt 证书自动续期，Nginx 支持 SSE、WebSocket 和 68 MiB 上传。旧 Orbix 的 `/orbix`、`/tricli`、`/api` 反向代理已移除。生产 Web 包来自成功的 GitHub Actions artifact，而不是在受限机器上强行完成大内存构建。
 
 ## 5. 安全与运维边界
 
 - 访问凭据只保存在隔离的 Orbix home/settings 中，不进入 Git。
 - 服务开启 `NoNewPrivileges=true`，并配置 memory、swap、CPU 和 tasks 上限。
 - Hub 支持 token authentication；公网使用应配合 HTTPS、自有隧道或 WireGuard，见安装文档。
+- 当前部署只通过 Nginx 暴露 443，Hub 自身不再监听公网接口；HSTS、nosniff 和严格 Referrer Policy 已启用。
+- `/root/bin/safe-run` 提供主机级内存/CPU/tasks/timeout 限制和全局互斥锁；本地 production build 默认拒绝并转交 GitHub Actions。
 - 参考项目源码位于忽略目录，仅用于架构与交互研究，不随 Orbix 仓库发布。
 - 不修改用户现有 Codex/Claude/Cursor 全局配置来制造测试条件。
 

@@ -102,6 +102,8 @@ ORBIX_LISTEN_HOST=127.0.0.1 orbix hub
 
 Use a named Cloudflare Tunnel, Tailscale Serve, a VPN, or an HTTPS reverse proxy as described under [Self-hosted tunnels](#self-hosted-tunnels). Set `ORBIX_PUBLIC_URL` to that HTTPS URL so links and notifications point to the correct address.
 
+For Nginx, start from [`deploy/nginx/orbix.conf.example`](../../deploy/nginx/orbix.conf.example). The example preserves WebSocket upgrades, disables proxy buffering for SSE, permits Orbix uploads, redirects HTTP to HTTPS, and includes mobile-PWA security headers. When using Certbot `certonly --webroot`, add a deploy hook that validates and reloads Nginx after renewal.
+
 `orbix server` remains supported as an alias.
 
 ### Optional custom WireGuard relay
