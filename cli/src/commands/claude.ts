@@ -81,7 +81,7 @@ export const claudeCommand: CommandDefinition = {
 
         if (showHelp) {
             console.log(`
-${chalk.bold('orbix')} - Claude Code On the Go
+${chalk.bold('orbix')} - Remote control for Codex, Claude Code, and Cursor Agent
 
 ${chalk.bold('Usage:')}
   orbix [options]         Start Claude with Telegram control (direct-connect)

@@ -1,7 +1,15 @@
 import type { ChildProcess } from 'node:child_process';
 import spawn from 'cross-spawn';
+import { readFileSync } from 'node:fs';
 
 export const isWindows = (): boolean => process.platform === 'win32';
+
+export function isZombieProcStat(stat: string): boolean {
+  // /proc/<pid>/stat is: pid (comm, which may contain spaces) state ...
+  const closeParen = stat.lastIndexOf(')');
+  if (closeParen < 0) return false;
+  return stat.slice(closeParen + 1).trimStart().startsWith('Z');
+}
 
 export function isProcessAlive(pid: number): boolean {
   if (!Number.isFinite(pid) || pid <= 0) {
@@ -10,6 +18,20 @@ export function isProcessAlive(pid: number): boolean {
 
   try {
     process.kill(pid, 0);
+    // kill(pid, 0) also succeeds for zombies. Treating zombies as alive makes
+    // child-first tree shutdown wait the full timeout for every Cursor/TS
+    // language-server descendant while their parent has not been reaped yet.
+    // That turned a normal stop into a multi-minute operation on Linux.
+    if (process.platform === 'linux') {
+      try {
+        if (isZombieProcStat(readFileSync(`/proc/${pid}/stat`, 'utf8'))) {
+          return false;
+        }
+      } catch {
+        // The process disappeared between kill(0) and reading procfs.
+        return false;
+      }
+    }
     return true;
   } catch {
     return false;
