@@ -25,6 +25,8 @@ jobs:
         run: cd shared && bun test --max-concurrency=1 --parallel=1
       - name: Hub tests
         run: cd hub && bun test --max-concurrency=1 --parallel=1
+      - name: CLI provider and transport tests
+        run: cd cli && bun run tools:unpack && bunx vitest run --maxWorkers=2
       - name: Web tests
         run: cd web && bunx vitest run --maxWorkers=2
       - name: Build production PWA
