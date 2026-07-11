@@ -583,7 +583,35 @@ function SessionsPage() {
 }
 
 function SessionsIndexPage() {
-    return null
+    const navigate = useNavigate()
+    const { t } = useTranslation()
+
+    return (
+        <div className="hidden h-full items-center justify-center bg-[var(--app-secondary-bg)] p-8 lg:flex">
+            <div className="w-full max-w-md rounded-[28px] border border-[var(--app-border)] bg-[var(--app-bg)] p-9 shadow-[0_20px_70px_rgba(0,0,0,0.06)]">
+                <div className="flex items-center gap-3">
+                    <img src="/icon.svg" alt="" className="h-12 w-12 rounded-2xl" />
+                    <div>
+                        <div className="text-xl font-semibold tracking-tight">Orbix</div>
+                        <div className="text-xs text-[var(--app-hint)]">Codex · Claude Code · Cursor Agent</div>
+                    </div>
+                </div>
+                <h2 className="mt-8 text-2xl font-semibold tracking-tight">{t('sessions.home.title')}</h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--app-hint)]">{t('sessions.home.hint')}</p>
+                <div className="mt-7 grid grid-cols-2 gap-3">
+                    <button type="button" onClick={() => navigate({ to: '/sessions/new' })} className="h-11 rounded-2xl bg-[var(--app-button)] px-4 text-sm font-medium text-[var(--app-button-text)] transition-opacity hover:opacity-90">
+                        {t('sessions.empty.startSession')}
+                    </button>
+                    <button type="button" onClick={() => navigate({ to: '/browse' })} className="h-11 rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg)] px-4 text-sm font-medium transition-colors hover:bg-[var(--app-subtle-bg)]">
+                        {t('sessions.empty.browse')}
+                    </button>
+                </div>
+                <div className="mt-7 border-t border-[var(--app-border)] pt-5 text-xs leading-5 text-[var(--app-hint)]">
+                    {t('sessions.empty.desktopHint')}
+                </div>
+            </div>
+        </div>
+    )
 }
 
 /**
