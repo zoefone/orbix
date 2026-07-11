@@ -212,7 +212,7 @@ function SessionPreviewLimitControl(props: {
                     disabled={props.value <= MIN_SESSION_PREVIEW_LIMIT}
                     aria-label={props.decreaseLabel}
                     title={props.decreaseLabel}
-                    className="flex h-8 w-8 items-center justify-center rounded-l-lg text-[var(--app-hint)] transition-colors hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-11 w-11 items-center justify-center rounded-l-lg text-[var(--app-hint)] transition-colors hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <MinusIcon className="h-3.5 w-3.5" />
                 </button>
@@ -245,7 +245,7 @@ function SessionPreviewLimitControl(props: {
                     disabled={props.value >= MAX_SESSION_PREVIEW_LIMIT}
                     aria-label={props.increaseLabel}
                     title={props.increaseLabel}
-                    className="flex h-8 w-8 items-center justify-center rounded-r-lg text-[var(--app-hint)] transition-colors hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-11 w-11 items-center justify-center rounded-r-lg text-[var(--app-hint)] transition-colors hover:bg-[var(--app-subtle-bg)] hover:text-[var(--app-fg)] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <PlusIcon className="h-3.5 w-3.5" />
                 </button>
@@ -719,7 +719,7 @@ export default function SettingsPage() {
                     <button
                         type="button"
                         onClick={goBack}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
+                        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--app-hint)] transition-colors hover:bg-[var(--app-secondary-bg)] hover:text-[var(--app-fg)]"
                     >
                         <BackIcon />
                     </button>
