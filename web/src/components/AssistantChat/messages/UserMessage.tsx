@@ -70,7 +70,7 @@ export function HappyUserMessage() {
                                 type="button"
                                 onClick={() => setShowMetadata((open) => !open)}
                                 aria-expanded={showMetadata}
-                                className="text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
+                                className="-my-2 inline-flex min-h-11 items-center px-1 text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                             >
                                 {showMetadata ? 'Hide info' : 'Show info'}
                             </button>
@@ -104,7 +104,8 @@ export function HappyUserMessage() {
                                 <button
                                     type="button"
                                     title="Copy"
-                                    className="rounded-md p-0.5 opacity-60 transition-[opacity,background-color] hover:bg-[var(--app-chat-user-chip-bg)] sm:opacity-0 sm:group-hover/msg:opacity-100"
+                                    aria-label="Copy message"
+                                    className="flex h-11 w-11 items-center justify-center rounded-xl opacity-60 transition-[opacity,background-color] hover:bg-[var(--app-chat-user-chip-bg)] sm:opacity-0 sm:group-hover/msg:opacity-100"
                                     onClick={() => copy(text)}
                                 >
                                     {copied
@@ -123,7 +124,7 @@ export function HappyUserMessage() {
                             type="button"
                             onClick={() => setShowMetadata((open) => !open)}
                             aria-expanded={showMetadata}
-                            className="text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
+                            className="-my-2 inline-flex min-h-11 items-center px-1 text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                         >
                             {showMetadata ? 'Hide info' : 'Show info'}
                         </button>

@@ -373,8 +373,9 @@ function CodeHeader(props: CodeHeaderProps) {
             <button
                 type="button"
                 onClick={() => copy(props.code)}
-                className="shrink-0 rounded-md p-1 text-[var(--app-code-header-fg)] transition-colors hover:bg-[var(--app-code-copy-hover-bg)] hover:text-[var(--app-fg)]"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--app-code-header-fg)] transition-colors hover:bg-[var(--app-code-copy-hover-bg)] hover:text-[var(--app-fg)]"
                 title="Copy"
+                aria-label="Copy code"
             >
                 {copied ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
             </button>

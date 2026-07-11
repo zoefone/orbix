@@ -81,7 +81,7 @@ export function HappyAssistantMessage() {
                             type="button"
                             onClick={() => setShowMetadata((open) => !open)}
                             aria-expanded={showMetadata}
-                            className="text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
+                            className="-my-2 inline-flex min-h-11 items-center px-1 text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                         >
                             {showMetadata ? 'Hide info' : 'Show info'}
                         </button>
@@ -116,7 +116,7 @@ export function HappyAssistantMessage() {
                                     type="button"
                                     onClick={() => setShowMetadata((open) => !open)}
                                     aria-expanded={showMetadata}
-                                    className="text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
+                                    className="-my-2 inline-flex min-h-11 items-center px-1 text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                                 >
                                     {showMetadata ? 'Hide info' : 'Show info'}
                                 </button>
@@ -137,6 +137,7 @@ export function HappyAssistantMessage() {
                             <button
                                 type="button"
                                 title="Copy"
+                                aria-label="Copy message"
                                 className="p-0.5 rounded hover:bg-[var(--app-subtle-bg)] transition-colors"
                                 onClick={() => copy(copyText)}
                             >
@@ -166,7 +167,7 @@ export function HappyAssistantMessage() {
                                 type="button"
                                 onClick={() => setShowMetadata((open) => !open)}
                                 aria-expanded={showMetadata}
-                                className="text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
+                                className="-my-2 inline-flex min-h-11 items-center px-1 text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                             >
                                 {showMetadata ? 'Hide info' : 'Show info'}
                             </button>
@@ -201,7 +202,7 @@ export function HappyAssistantMessage() {
                                 type="button"
                                 onClick={() => setShowMetadata((open) => !open)}
                                 aria-expanded={showMetadata}
-                                className="text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
+                                className="-my-2 inline-flex min-h-11 items-center px-1 text-[10px] text-[var(--app-hint)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                             >
                                 {showMetadata ? 'Hide info' : 'Show info'}
                             </button>
@@ -222,6 +223,7 @@ export function HappyAssistantMessage() {
                         <button
                             type="button"
                             title="Copy"
+                            aria-label="Copy message"
                             className="p-0.5 rounded hover:bg-[var(--app-subtle-bg)] transition-colors"
                             onClick={() => copy(copyText)}
                         >
