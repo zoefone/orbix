@@ -22,6 +22,8 @@ type PushPayload = {
     icon?: string
     badge?: string
     tag?: string
+    requireInteraction?: boolean
+    silent?: boolean
     data?: {
         type?: string
         sessionId?: string
@@ -115,7 +117,7 @@ self.addEventListener('push', (event) => {
         return
     }
 
-    const title = payload.title || 'ORBIX'
+    const title = payload.title || 'Orbix'
     const body = payload.body ?? ''
     const icon = payload.icon ?? '/pwa-192x192.png'
     const badge = payload.badge ?? '/pwa-64x64.png'
@@ -128,7 +130,9 @@ self.addEventListener('push', (event) => {
             icon,
             badge,
             data,
-            tag
+            tag,
+            requireInteraction: payload.requireInteraction,
+            silent: payload.silent
         })
     )
 })

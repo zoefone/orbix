@@ -10,6 +10,7 @@ export class NotificationHub {
     private readonly lastKnownRequests: Map<string, Set<string>> = new Map()
     private readonly notificationDebounce: Map<string, NodeJS.Timeout> = new Map()
     private readonly lastReadyNotificationAt: Map<string, number> = new Map()
+    private readonly knownActiveSessions: Set<string> = new Set()
     private unsubscribeSyncEvents: (() => void) | null = null
 
     constructor(
@@ -37,6 +38,7 @@ export class NotificationHub {
         this.notificationDebounce.clear()
         this.lastKnownRequests.clear()
         this.lastReadyNotificationAt.clear()
+        this.knownActiveSessions.clear()
     }
 
     private handleSyncEvent(event: SyncEvent): void {
@@ -45,6 +47,12 @@ export class NotificationHub {
             if (!session || !session.active) {
                 this.clearSessionState(event.sessionId)
                 return
+            }
+            if (!this.knownActiveSessions.has(session.id)) {
+                this.knownActiveSessions.add(session.id)
+                this.notifySessionStarted(session).catch((error) => {
+                    console.error('[NotificationHub] Failed to send session started notification:', error)
+                })
             }
             this.checkForPermissionNotification(session)
             return
@@ -61,6 +69,7 @@ export class NotificationHub {
                     console.error('[NotificationHub] Failed to send session completion notification:', error)
                 })
             }
+            this.clearSessionState(event.sessionId)
             return
         }
 
@@ -89,6 +98,7 @@ export class NotificationHub {
         }
         this.lastKnownRequests.delete(sessionId)
         this.lastReadyNotificationAt.delete(sessionId)
+        this.knownActiveSessions.delete(sessionId)
     }
 
     private getNotifiableSession(sessionId: string): Session | null {
@@ -187,6 +197,17 @@ export class NotificationHub {
                 await channel.sendReady(session)
             } catch (error) {
                 console.error('[NotificationHub] Failed to send ready notification:', error)
+            }
+        }
+    }
+
+    private async notifySessionStarted(session: Session): Promise<void> {
+        for (const channel of this.channels) {
+            if (typeof channel.sendSessionStarted !== 'function') continue
+            try {
+                await channel.sendSessionStarted(session)
+            } catch (error) {
+                console.error('[NotificationHub] Failed to send session started notification:', error)
             }
         }
     }

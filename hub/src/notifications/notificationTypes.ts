@@ -7,6 +7,7 @@ export type TaskNotification = {
 }
 
 export type NotificationChannel = {
+    sendSessionStarted?: (session: Session) => Promise<void>
     sendReady: (session: Session) => Promise<void>
     sendPermissionRequest: (session: Session) => Promise<void>
     sendTaskNotification: (session: Session, notification: TaskNotification) => Promise<void>

@@ -15,6 +15,27 @@ function createSession(overrides: Partial<Session> = {}): Session {
 }
 
 describe('PushNotificationChannel', () => {
+    it('keeps one replaceable OS notification while a session is working', async () => {
+        const pushed: Array<{ namespace: string; payload: PushPayload }> = []
+        const channel = new PushNotificationChannel(
+            { sendToNamespace: async (namespace: string, payload: PushPayload) => { pushed.push({ namespace, payload }) } } as never,
+            { sendToast: async () => 0 } as never,
+            { hasVisibleConnection: () => true } as never,
+            ''
+        )
+
+        const session = createSession()
+        await channel.sendSessionStarted(session)
+        await channel.sendSessionCompletion(session, 'completed')
+
+        expect(pushed).toHaveLength(2)
+        expect(pushed[0].payload.tag).toBe(`session-status-${session.id}`)
+        expect(pushed[0].payload.requireInteraction).toBe(true)
+        expect(pushed[0].payload.silent).toBe(true)
+        expect(pushed[1].payload.tag).toBe(pushed[0].payload.tag)
+        expect(pushed[1].payload.requireInteraction).toBe(false)
+    })
+
     it('sends task notifications to visible web clients before falling back to push', async () => {
         const pushed: Array<{ namespace: string; payload: PushPayload }> = []
         const toasts: unknown[] = []

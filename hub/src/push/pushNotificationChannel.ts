@@ -13,6 +13,26 @@ export class PushNotificationChannel implements NotificationChannel {
         _appUrl: string
     ) {}
 
+    async sendSessionStarted(session: Session): Promise<void> {
+        if (!session.active) return
+        const payload: PushPayload = {
+            title: `${getAgentName(session)} is working`,
+            body: getSessionName(session),
+            tag: `session-status-${session.id}`,
+            requireInteraction: true,
+            silent: true,
+            data: {
+                type: 'session-working',
+                sessionId: session.id,
+                url: this.buildSessionPath(session.id)
+            }
+        }
+        // Status notifications intentionally bypass visible-client suppression:
+        // the installed phone PWA should keep an OS-level working indicator even
+        // when the desktop browser is open.
+        await this.pushService.sendToNamespace(session.namespace, payload)
+    }
+
     async sendPermissionRequest(session: Session): Promise<void> {
         if (!session.active) {
             return
@@ -131,6 +151,22 @@ export class PushNotificationChannel implements NotificationChannel {
             }
         }
 
+        await this.pushService.sendToNamespace(session.namespace, payload)
+    }
+
+    async sendSessionCompletion(session: Session, _reason?: unknown): Promise<void> {
+        const payload: PushPayload = {
+            title: 'Task completed',
+            body: `${getAgentName(session)} · ${getSessionName(session)}`,
+            tag: `session-status-${session.id}`,
+            requireInteraction: false,
+            silent: false,
+            data: {
+                type: 'session-completed',
+                sessionId: session.id,
+                url: this.buildSessionPath(session.id)
+            }
+        }
         await this.pushService.sendToNamespace(session.namespace, payload)
     }
 

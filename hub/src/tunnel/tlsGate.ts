@@ -59,15 +59,16 @@ function hostMatchesCertificate(host: string, cert: PeerCertificate): boolean {
     }
 
     const commonName = cert.subject?.CN
-    if (!commonName) {
+    const commonNames = Array.isArray(commonName) ? commonName : commonName ? [commonName] : []
+    if (commonNames.length === 0) {
         return false
     }
 
     if (hostIsIp) {
-        return commonName === host
+        return commonNames.includes(host)
     }
 
-    return dnsNameMatchesHost(host, commonName)
+    return commonNames.some((name) => dnsNameMatchesHost(host, name))
 }
 
 function parseCertDate(value: string | undefined): Date | null {

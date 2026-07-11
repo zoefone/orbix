@@ -6,6 +6,8 @@ export type PushPayload = {
     title: string
     body: string
     tag?: string
+    requireInteraction?: boolean
+    silent?: boolean
     data?: {
         type: string
         sessionId: string
