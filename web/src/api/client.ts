@@ -13,6 +13,7 @@ import type {
     MessagesResponse,
     PermissionMode,
     PushSubscriptionPayload,
+    PushTestResponse,
     PushUnsubscribePayload,
     PushVapidPublicKeyResponse,
     SlashCommandsResponse,
@@ -196,6 +197,12 @@ export class ApiClient {
         await this.request('/api/push/subscribe', {
             method: 'POST',
             body: JSON.stringify(payload)
+        })
+    }
+
+    async testPushNotifications(): Promise<PushTestResponse> {
+        return await this.request<PushTestResponse>('/api/push/test', {
+            method: 'POST'
         })
     }
 

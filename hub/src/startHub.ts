@@ -229,6 +229,7 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
         jwtSecret,
         store,
         vapidPublicKey: vapidKeys.publicKey,
+        pushService,
         socketEngine: socketServer.engine,
         corsOrigins,
         // A self-hosted relay should be immediately usable from its tunnel URL.

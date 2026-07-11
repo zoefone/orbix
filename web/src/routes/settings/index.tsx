@@ -385,6 +385,7 @@ export default function SettingsPage() {
     const [isVoiceBackendOpen, setIsVoiceBackendOpen] = useState(false)
     const [isVoicePickerOpen, setIsVoicePickerOpen] = useState(false)
     const [isNotificationBusy, setIsNotificationBusy] = useState(false)
+    const [isNotificationTestBusy, setIsNotificationTestBusy] = useState(false)
     const [notificationFeedback, setNotificationFeedback] = useState<string | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const appearanceContainerRef = useRef<HTMLDivElement>(null)
@@ -433,6 +434,19 @@ export default function SettingsPage() {
             setNotificationFeedback(enabled ? 'enabled' : 'error')
         } finally {
             setIsNotificationBusy(false)
+        }
+    }
+
+    const handleNotificationTest = async () => {
+        setIsNotificationTestBusy(true)
+        setNotificationFeedback(null)
+        try {
+            const result = await api.testPushNotifications()
+            setNotificationFeedback(result.report.sent > 0 ? 'test-sent' : 'error')
+        } catch {
+            setNotificationFeedback('test-failed')
+        } finally {
+            setIsNotificationTestBusy(false)
         }
     }
 
@@ -820,27 +834,45 @@ export default function SettingsPage() {
                                 </p>
                             </div>
                             {pushNotifications.availability === 'available' && pushNotifications.permission !== 'denied' ? (
-                                <button
-                                    type="button"
-                                    disabled={isNotificationBusy}
-                                    onClick={() => void handleNotificationToggle()}
-                                    className={`min-h-11 min-w-20 shrink-0 rounded-xl px-3 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${
-                                        pushNotifications.isSubscribed
-                                            ? 'border border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
-                                            : 'bg-[var(--app-fg)] text-[var(--app-bg)] hover:opacity-90'
-                                    }`}
-                                >
-                                    {isNotificationBusy
-                                        ? t('settings.notifications.working')
-                                        : pushNotifications.isSubscribed
-                                            ? t('settings.notifications.disable')
-                                            : t('settings.notifications.enable')}
-                                </button>
+                                <div className="flex shrink-0 flex-col gap-2">
+                                    <button
+                                        type="button"
+                                        disabled={isNotificationBusy || isNotificationTestBusy}
+                                        onClick={() => void handleNotificationToggle()}
+                                        className={`min-h-11 min-w-20 rounded-xl px-3 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${
+                                            pushNotifications.isSubscribed
+                                                ? 'border border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
+                                                : 'bg-[var(--app-fg)] text-[var(--app-bg)] hover:opacity-90'
+                                        }`}
+                                    >
+                                        {isNotificationBusy
+                                            ? t('settings.notifications.working')
+                                            : pushNotifications.isSubscribed
+                                                ? t('settings.notifications.disable')
+                                                : t('settings.notifications.enable')}
+                                    </button>
+                                    {pushNotifications.isSubscribed ? (
+                                        <button
+                                            type="button"
+                                            disabled={isNotificationBusy || isNotificationTestBusy}
+                                            onClick={() => void handleNotificationTest()}
+                                            className="min-h-11 min-w-20 rounded-xl bg-[var(--app-fg)] px-3 text-sm font-semibold text-[var(--app-bg)] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
+                                        >
+                                            {isNotificationTestBusy
+                                                ? t('settings.notifications.testing')
+                                                : t('settings.notifications.test')}
+                                        </button>
+                                    ) : null}
+                                </div>
                             ) : null}
                         </div>
                         {(notificationFeedback || pushNotifications.error) ? (
                             <p role="status" className="px-3 pb-3 text-xs text-[var(--app-hint)]">
-                                {notificationFeedback === 'enabled'
+                                {notificationFeedback === 'test-sent'
+                                    ? t('settings.notifications.testSent')
+                                    : notificationFeedback === 'test-failed'
+                                        ? t('settings.notifications.testFailed')
+                                        : notificationFeedback === 'enabled'
                                     ? t('settings.notifications.enabledFeedback')
                                     : notificationFeedback === 'disabled'
                                         ? t('settings.notifications.disabledFeedback')

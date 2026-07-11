@@ -15,6 +15,13 @@ export type PushPayload = {
     }
 }
 
+export type PushDeliveryReport = {
+    total: number
+    sent: number
+    removed: number
+    failed: number
+}
+
 type StoredSubscription = {
     endpoint: string
     p256dh: string
@@ -38,23 +45,29 @@ export class PushService {
         webPush.setVapidDetails(this.subject, this.vapidKeys.publicKey, this.vapidKeys.privateKey)
     }
 
-    async sendToNamespace(namespace: string, payload: PushPayload): Promise<void> {
+    async sendToNamespace(namespace: string, payload: PushPayload): Promise<PushDeliveryReport> {
         const subscriptions = this.store.push.getPushSubscriptionsByNamespace(namespace)
         if (subscriptions.length === 0) {
-            return
+            return { total: 0, sent: 0, removed: 0, failed: 0 }
         }
 
         const body = JSON.stringify(payload)
-        await Promise.all(subscriptions.map((subscription) => {
+        const results = await Promise.all(subscriptions.map((subscription) => {
             return this.sendToSubscription(namespace, subscription, body)
         }))
+        return {
+            total: subscriptions.length,
+            sent: results.filter((result) => result === 'sent').length,
+            removed: results.filter((result) => result === 'removed').length,
+            failed: results.filter((result) => result === 'failed').length
+        }
     }
 
     private async sendToSubscription(
         namespace: string,
         subscription: StoredSubscription,
         body: string
-    ): Promise<void> {
+    ): Promise<'sent' | 'removed' | 'failed'> {
         const pushSubscription: PushSubscription = {
             endpoint: subscription.endpoint,
             keys: {
@@ -65,17 +78,19 @@ export class PushService {
 
         try {
             await webPush.sendNotification(pushSubscription, body)
+            return 'sent'
         } catch (error) {
             const statusCode = typeof (error as { statusCode?: unknown }).statusCode === 'number'
                 ? (error as { statusCode: number }).statusCode
                 : null
 
-            if (statusCode === 410) {
+            if (statusCode === 404 || statusCode === 410) {
                 this.store.push.removePushSubscription(namespace, subscription.endpoint)
-                return
+                return 'removed'
             }
 
             console.error('[PushService] Failed to send notification:', error)
+            return 'failed'
         }
     }
 }

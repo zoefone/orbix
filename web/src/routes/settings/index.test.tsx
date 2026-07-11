@@ -112,6 +112,10 @@ const { mockFetchVoices, mockFetchVoiceBackend, mockApi, mockClearAuth, mockPush
     }))
     const mockApi = {
         fetchVoices: vi.fn(() => Promise.resolve({ voices: [] })),
+        testPushNotifications: vi.fn(() => Promise.resolve({
+            ok: true,
+            report: { total: 1, sent: 1, removed: 0, failed: 0 },
+        })),
     }
     const mockClearAuth = vi.fn()
     const mockPushNotifications = {
@@ -270,6 +274,21 @@ describe('SettingsPage', () => {
         await waitFor(() => {
             expect(mockPushNotifications.requestPermission).toHaveBeenCalledTimes(1)
             expect(mockPushNotifications.subscribe).toHaveBeenCalledTimes(1)
+        })
+    })
+
+    it('sends a test notification from Settings after subscription', async () => {
+        mockPushNotifications.availability = 'available'
+        mockPushNotifications.isSupported = true
+        mockPushNotifications.permission = 'granted'
+        mockPushNotifications.isSubscribed = true
+        renderWithProviders(<SettingsPage />)
+
+        fireEvent.click(screen.getByRole('button', { name: 'Send test' }))
+
+        await waitFor(() => {
+            expect(mockApi.testPushNotifications).toHaveBeenCalledTimes(1)
+            expect(screen.getByText(/Test sent/)).toBeInTheDocument()
         })
     })
 

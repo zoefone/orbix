@@ -151,6 +151,18 @@ export type PushVapidPublicKeyResponse = {
     publicKey: string
 }
 
+export type PushDeliveryReport = {
+    total: number
+    sent: number
+    removed: number
+    failed: number
+}
+
+export type PushTestResponse = {
+    ok: true
+    report: PushDeliveryReport
+}
+
 export type CodexDesktopScriptResponse = {
     success: boolean
     message?: string
