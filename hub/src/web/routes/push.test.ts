@@ -1,10 +1,11 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { Hono } from 'hono'
 import type { WebAppEnv } from '../middleware/auth'
+import type { PushPayload } from '../../push/pushService'
 import { createPushRoutes } from './push'
 
 function createApp(report: { total: number; sent: number; removed: number; failed: number }) {
-    const sendToNamespace = mock(async () => report)
+    const sendToNamespace = mock(async (_namespace: string, _payload: PushPayload) => report)
     const store = {
         push: {
             addPushSubscription: mock(() => {}),
