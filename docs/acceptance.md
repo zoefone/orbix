@@ -17,8 +17,10 @@
 | 文件树和文件查看 | 通过 | `web/src/components/SessionFiles/`、files handler、文件搜索 hooks | Web 自动化测试通过 |
 | 工作时显示通知栏状态 | 通过 | `hub/src/notifications/notificationHub.ts`、`hub/src/push/`、`web/src/sw.ts` | 会话开始发送同 tag 的持续、静默状态通知；公网 HTTPS 实测 secure context、Service Worker、PushManager、Notification API 均可用 |
 | 完成、失败、审批和选择时弹出通知 | 通过 | 完成通知使用相同 tag 替换工作通知；审批、Ready、失败事件独立通知 | NotificationHub、Push channel、Service Worker 测试通过 |
+| 设备通知自检 | 通过 | `/api/push/test`、Settings 的“发送测试”、投递报告与 10 秒限流 | 路由成功/无订阅/限流测试通过；无设备订阅时真实 HTTPS API 正确返回 409 而不是虚报成功 |
 | 黑白灰、圆角、美观的图形界面 | 通过 | Orbix 设计 token、全新单色图标、登录页、桌面空状态、会话页和设置页 | 手机 light/dark、桌面 light、登录/sessions/settings 视觉巡检无页面错误；设计基线见 `design-system/orbix-next/MASTER.md` |
 | 深色、浅色和跟随系统 | 通过 | `web/src/hooks/useTheme.ts`；Settings 的 appearance 配置（另含 OLED） | theme 与 theme colors 测试通过，手机 light/dark 实际截图通过 |
+| 移动端可访问性 | 通过 | 44px 控件、safe-area、允许浏览器缩放、reduced-motion CSS、统一 SVG 图标标签 | 390×844 真实会话页扫描：横向溢出 0、可见小于 44px 的按钮 0、page errors 0 |
 | 对话页和独立设置页 | 通过 | 会话路由与独立 `/settings` 页面 | 手机和桌面设置页均完成视觉巡检 |
 | 安装到手机/PWA | 通过 | PWA icons、manifest、Service Worker、Apple icon、mask icon | GitHub Actions 完整 production PWA build 成功，构建产物已部署 |
 | 中英文界面 | 通过 | Web i18n 文案与语言设置 | Web 测试和实际页面巡检通过 |
@@ -60,7 +62,7 @@ GitHub Actions 工作流：`.github/workflows/ci.yml`。
 7. 4GB V8 heap 的完整 production PWA build；
 8. 上传 `orbix-web` 构建 artifact。
 
-验收时最近的完整成功 run：`29153098105`（commit `3b42fe3`）。工作流还会验证 marketing website typecheck、公开发行链接审计以及 website/VitePress production build。本机资源只有约 2C2G，完整 Rollup/Vite production build 明确放在 GitHub Actions 执行，避免突破服务器资源上限。
+验收时最近的完整成功 run：`29158845613`（commit `e3cbfdd`）。工作流还会验证 marketing website typecheck、公开发行链接审计以及 website/VitePress production build。本机资源只有约 2C2G，完整 Rollup/Vite production build 明确放在 GitHub Actions 执行，避免突破服务器资源上限。
 
 ## 4. 真实运行验收
 
@@ -80,6 +82,7 @@ GitHub Actions 工作流：`.github/workflows/ci.yml`。
 - Hub 支持 token authentication；公网使用应配合 HTTPS、自有隧道或 WireGuard，见安装文档。
 - 当前部署只通过 Nginx 暴露 443，Hub 自身不再监听公网接口；HSTS、nosniff 和严格 Referrer Policy 已启用。
 - `/root/bin/safe-run` 提供主机级内存/CPU/tasks/timeout 限制和全局互斥锁；本地 production build 默认拒绝并转交 GitHub Actions。
+- Service Worker 只缓存应用壳和公开静态资源；旧版本的 session/machine 私有缓存会在 activate 时主动删除，防止同设备切换 Hub/账户后读取前一身份的数据。
 - 参考项目源码位于忽略目录，仅用于架构与交互研究，不随 Orbix 仓库发布。
 - 不修改用户现有 Codex/Claude/Cursor 全局配置来制造测试条件。
 

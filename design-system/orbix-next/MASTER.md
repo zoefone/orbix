@@ -1,208 +1,184 @@
-# Design System Master File
+# Orbix Product Design System
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> Source of truth reconciled with the Open Design `orbix-remote-control` project, the reference screens in `/root/images3`, live PWA screenshots, and UI/UX Pro Max mobile guidance.
 
----
+## Product character
 
-**Project:** Orbix Next
-**Generated:** 2026-07-10 19:04:00
-**Category:** Coding Bootcamp
+Orbix is a control plane for long-running coding agents. The interface must feel calm, precise and operational rather than promotional. It should make task state, required user action and changed files obvious without adding visual noise.
 
----
+**Keywords:** monochrome, rounded, quiet, task-first, realtime, compact, trustworthy.
 
-## Global Rules
+## Principles
 
-### Color Palette
+1. **Content before chrome** — conversations, tool activity and approvals dominate the screen.
+2. **Monochrome first** — black, white and neutral gray define structure. Color is reserved for diff and status semantics.
+3. **Mobile is a control surface, not a reduced desktop** — minimum 44×44px targets, safe areas, reachable bottom actions and no hover-only behavior.
+4. **State is explicit** — pair icons/color with text such as Working, Needs approval, Waiting, Completed or Failed.
+5. **Progressive density** — common controls remain visible; advanced voice/theme/debug options use grouping and disclosure.
+6. **Accessible by default** — browser zoom remains available, focus is visible, reduced motion is respected and async feedback uses live regions.
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#0F172A` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#1E293B` | `--color-secondary` |
-| Accent/CTA | `#22C55E` | `--color-accent` |
-| Background | `#020617` | `--color-background` |
-| Foreground | `#F8FAFC` | `--color-foreground` |
-| Muted | `#1A1E2F` | `--color-muted` |
-| Border | `#334155` | `--color-border` |
-| Destructive | `#EF4444` | `--color-destructive` |
-| Ring | `#0F172A` | `--color-ring` |
+## Typography
 
-**Color Notes:** Terminal dark + success green
+- **UI/body:** `Inter`, `ui-sans-serif`, `system-ui`, `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, sans-serif.
+- **Code/paths/metrics:** `ui-monospace`, `SFMono-Regular`, `Cascadia Code`, `Roboto Mono`, monospace.
+- Avoid decorative serif fonts in operational screens.
+- Default body size: 16px; supporting metadata: 12–13px; never use tiny text as the only actionable target.
+- Headings use weight and spacing rather than oversized display typography.
 
-### Typography
+## Semantic colors
 
-- **Heading Font:** Playfair Display
-- **Body Font:** Source Serif 4
-- **Mood:** monochrome, editorial, austere, typographic, pocket manifesto, luxury, high contrast, brutalist mobile
-- **Google Fonts:** [Playfair Display + Source Serif 4](https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400|Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300)
+Values are represented through the existing `--app-*` variables so light, dark, OLED and user-customized themes share behavior.
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap');
-```
+| Role | Light baseline | Dark baseline | Usage |
+| --- | --- | --- | --- |
+| Background | `#ffffff` | `#18181a` | Main canvas |
+| Surface | `#f4f4f5` | `#27282b` | Cards, composer, grouped tools |
+| Primary text | `#111827` | `#f5f5f5` | Titles and body |
+| Muted text | `#6b7280` | `#9ca3af` | Metadata and hints |
+| Border/divider | low-alpha black | low-alpha white | Structure only |
+| Primary action | near-black | near-white | Main CTA |
+| Success/online | restrained green | restrained green | Online, passed, added diff |
+| Warning/waiting | amber | amber | Pending, scheduled, attention |
+| Error/destructive | red | red | Failed, denied, removed diff |
 
-### Spacing Variables
+Never use a status color without a text label or accessible name.
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+## Geometry and spacing
 
-### Shadow Depths
+- Base spacing unit: 4px.
+- Common gaps: 8px, 12px, 16px, 24px.
+- Mobile page padding: 12–16px.
+- Card/surface radius: 16–24px.
+- Compact controls/pills: 10–14px or fully rounded.
+- Dialog radius: 20–24px.
+- Minimum interactive target: **44×44px**.
+- Adjacent touch targets: at least **8px** separation where layout permits.
+- Borders are subtle; shadows are sparse and low contrast.
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+## Motion
 
----
+- Standard transition: 150–200ms for color/opacity.
+- Do not shift layout on hover.
+- Avoid decorative parallax, bounce or continuous glow.
+- Under `prefers-reduced-motion: reduce`, collapse animations and transitions to effectively instant state changes.
 
-## Component Specs
+## Icon language
+
+- Use one consistent outline family compatible with Lucide: 1.75–2px stroke, rounded caps/joins.
+- Provider marks may use their official vector identity, normalized to the same visual box.
+- No emoji as structural icons.
+- Icon-only buttons require an accessible label and a 44px hit area even when the glyph is 16–20px.
+
+## Core components
 
 ### Buttons
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #22C55E;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+- Primary: solid high-contrast neutral, 44px minimum height, 12px radius.
+- Secondary: neutral border/surface, same height and radius.
+- Destructive: use red only when the action is destructive; confirmation remains explicit.
+- Loading states keep width stable and replace the label with a clear progress verb.
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+### Session row
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #0F172A;
-  border: 2px solid #0F172A;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
+- Strong task title on line one.
+- Metadata line: provider · workspace/machine · state · optional diff summary.
+- Attention state must be visible through text and icon, not a dot alone.
+- Group by Pinned, Today and workspace/machine when data volume warrants it.
 
-### Cards
+### Conversation timeline
 
-```css
-.card {
-  background: #020617;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+- User message uses a rounded neutral bubble.
+- Assistant prose stays visually light and readable.
+- Repetitive commands/tool calls collapse into compact summaries.
+- Reasoning, diff, approvals, questions and generated media have distinct semantic cards.
+- Copy/info actions retain 44px hit areas without visually dominating the message.
 
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
+### Composer
 
-### Inputs
+- Floating rounded surface above the bottom safe area.
+- Attachment, settings, terminal, stop/switch, schedule and send/voice controls remain reachable.
+- Primary send/stop control is visually strongest.
+- Toolbar may adapt or wrap rather than shrinking controls below 44px.
+- Never hide the final message behind the composer or install banner.
 
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
+### Notifications settings
 
-.input:focus {
-  border-color: #0F172A;
-  outline: none;
-  box-shadow: 0 0 0 3px #0F172A20;
-}
-```
+- Explain HTTPS/browser requirements before asking permission.
+- Permission prompt occurs only after tapping Enable.
+- Subscribed state exposes **Send test** and **Disable** as separate 44px controls.
+- Test result uses a polite live region and tells the user to background or lock the device.
 
-### Modals
+### Dialogs and menus
 
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
+- Keep destructive and cancel actions separated.
+- Focus is trapped and visibly indicated.
+- Close icon target is 44px.
+- Menus should not extend behind phone safe areas.
 
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+## Page hierarchy
 
----
+### Sessions
 
-## Style Guidelines
+Header → machine/task summary → search/filter → grouped session rows → new-task affordance.
 
-**Style:** Dark Mode (OLED)
+### Conversation
 
-**Keywords:** Dark theme, low light, high contrast, deep black, midnight blue, eye-friendly, OLED, night mode, power efficient
+Session header → live timeline → compact working/attention state → floating composer.
 
-**Best For:** Night-mode apps, coding platforms, entertainment, eye-strain prevention, OLED devices, low-light
+### Settings
 
-**Key Effects:** Minimal glow (text-shadow: 0 0 10px), dark-to-light transitions, low white emission, high readability, visible focus
+Language → Connection → Notifications → Display → Chat → Voice → About.
 
-### Page Pattern
+Connection and Notifications appear near the top because they determine whether remote control and alerts work at all.
 
-**Pattern Name:** Minimal Single Column
+## Responsive behavior
 
-- **Conversion Strategy:** Single CTA focus. Large typography. Lots of whitespace. No nav clutter. Mobile-first.
-- **CTA Placement:** Center, large CTA button
-- **Section Order:** 1. Hero headline, 2. Short description, 3. Benefit bullets (3 max), 4. CTA, 5. Footer
+Verify at minimum:
 
----
+- 390×844 mobile portrait
+- 768px tablet
+- 1024px compact desktop
+- 1440×900 desktop
 
-## Anti-Patterns (Do NOT Use)
+Rules:
 
-- ❌ Light mode only
-- ❌ Hidden results
+- No horizontal page scroll.
+- Mobile headers keep task title readable while actions retain 44px targets.
+- Desktop uses sidebar + content, but content width remains readable.
+- Safe-area top/bottom insets are applied to fixed/floating controls.
+- Browser zoom to 200% remains usable.
 
-### Additional Forbidden Patterns
+## Privacy and security UX
 
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
+- Display the active Hub origin in Settings.
+- Changing Hub/account clearly explains that the saved token is removed from the device.
+- Never persist authenticated session/machine payloads in shared Service Worker Cache Storage.
+- Tokens are removed from the visible URL after authentication.
+- Permission-bypass modes are visually explicit.
 
----
+## Anti-patterns
 
-## Pre-Delivery Checklist
+- Decorative gradients/glassmorphism in task views.
+- Green as a general brand color rather than a success semantic.
+- Tiny icon buttons or metadata links used as the only action target.
+- Automatic browser permission prompts.
+- Hover-only controls on mobile.
+- Color-only state communication.
+- Forced browser zoom prevention.
+- Long ungrouped settings pages without hierarchy.
+- Caching authenticated task data under shared cache keys.
+- Mixed emoji/custom/filled icon styles.
 
-Before delivering any UI code, verify:
+## Pre-release visual checklist
 
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+- [ ] Light, dark and OLED screenshots checked.
+- [ ] 390px mobile has no horizontal overflow.
+- [ ] Every visible mobile button is at least 44×44px.
+- [ ] Safe-area and virtual-keyboard behavior checked.
+- [ ] Focus indicators are visible.
+- [ ] Browser zoom remains enabled.
+- [ ] Reduced motion is respected.
+- [ ] Notification enable/blocked/subscribed/test/error states reviewed.
+- [ ] Working, approval, waiting, completed and failed sessions are distinguishable without color alone.
+- [ ] Icons are consistent SVGs with accessible names.
+- [ ] Authenticated API data is network-only in the Service Worker.
