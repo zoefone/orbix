@@ -10,8 +10,12 @@ export default {
   'loading.machines': '加载机器…',
 
   // Login / Auth
-  'login.title': 'ORBIX',
-  'login.subtitle': '随时随地，Vibe Coding',
+  'login.title': '连接到 Orbix',
+  'login.subtitle': '请输入 Orbix Hub 显示的访问令牌。',
+  'login.hero.kicker': '远程编程控制中心',
+  'login.hero.title': '无论身在何处，都能掌控你的编程智能体。',
+  'login.hero.description': '实时查看任务、处理审批、检查差异、上传文件，并可从手机或浏览器接管终端。',
+  'login.hero.trust': '自托管 · 实时同步 · 隐私优先',
   'login.bind.title': '绑定 Telegram',
   'login.submit': '登录',
   'login.bind.submit': '绑定',
@@ -23,7 +27,7 @@ export default {
   'login.error.loginUnavailable': '登录服务不可用。',
   'login.error.bindFailed': '绑定失败',
   'login.error.authFailed': '认证失败',
-  'login.help': '需要帮助？',
+  'login.help': '连接指南',
   'login.server.default': '(默认)',
   'login.server.custom': '(自定义)',
   'login.server.title': '服务器地址',
@@ -35,8 +39,8 @@ export default {
   'login.server.required': '必须先填写服务器地址才能登录。',
   'login.server.useSameOrigin': '使用同源',
   'login.server.save': '保存',
-  'login.footer': '用',
-  'login.footer.for': '设计，Vibe Coding',
+  'login.footer': '自托管，隐私优先',
+  'login.footer.for': '远程编程',
   'login.footer.copyright': '©',
 
   // Sessions page

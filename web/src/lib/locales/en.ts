@@ -10,8 +10,12 @@ export default {
   'loading.machines': 'Loading machines…',
 
   // Login / Auth
-  'login.title': 'ORBIX',
-  'login.subtitle': 'Vibe Coding Anytime, Anywhere',
+  'login.title': 'Connect to Orbix',
+  'login.subtitle': 'Enter the access token shown by your Orbix Hub.',
+  'login.hero.kicker': 'Remote coding control plane',
+  'login.hero.title': 'Your coding agents, wherever you are.',
+  'login.hero.description': 'Monitor live work, answer approvals, inspect diffs, upload files, and take over the terminal from any phone or browser.',
+  'login.hero.trust': 'Self-hosted · Realtime · Private by design',
   'login.bind.title': 'Bind Telegram',
   'login.submit': 'Sign In',
   'login.bind.submit': 'Bind',
@@ -23,7 +27,7 @@ export default {
   'login.error.loginUnavailable': 'Login is unavailable.',
   'login.error.bindFailed': 'Binding failed',
   'login.error.authFailed': 'Authentication failed',
-  'login.help': 'Needs help?',
+  'login.help': 'Connection guide',
   'login.server.default': '(Default)',
   'login.server.custom': '(Custom)',
   'login.server.title': 'Hub URL',
@@ -35,8 +39,8 @@ export default {
   'login.server.required': 'Hub URL required. Please set it before signing in.',
   'login.server.useSameOrigin': 'Use same origin',
   'login.server.save': 'Save hub',
-  'login.footer': 'Designed with',
-  'login.footer.for': 'for Vibe Coding',
+  'login.footer': 'Self-hosted and private by design',
+  'login.footer.for': 'for remote coding',
   'login.footer.copyright': '©',
 
   // Sessions page

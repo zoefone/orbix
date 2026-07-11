@@ -113,125 +113,108 @@ export function LoginPrompt(props: LoginPromptProps) {
     const submitLabel = isBindMode ? t('login.bind.submit') : t('login.submit')
 
     return (
-        <div className="relative h-full flex items-center justify-center p-4">
+        <div className="relative h-full min-h-0 overflow-y-auto bg-[var(--app-secondary-bg)] px-4 py-8 sm:px-6">
             {/* Language switcher */}
             <div className="absolute top-4 right-4">
                 <LanguageSwitcher />
             </div>
 
-            <div className="w-full max-w-sm space-y-6">
-                {/* Header */}
-                <div className="text-center space-y-2">
-                    <div className="text-2xl font-semibold">{title}</div>
-                    <div className="text-sm text-[var(--app-hint)]">
-                        {subtitle}
-                    </div>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <input
-                            type="password"
-                            value={accessToken}
-                            onChange={(e) => setAccessToken(e.target.value)}
-                            placeholder={t('login.placeholder')}
-                            autoComplete="current-password"
-                            disabled={isLoading}
-                            className="w-full px-3 py-2.5 rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-2 focus:ring-[var(--app-button)] focus:border-transparent disabled:opacity-50"
-                        />
-                    </div>
-
-                    {displayError && (
-                        <div className="text-sm text-red-500 text-center">
-                            {displayError}
+            <div className="mx-auto grid min-h-full w-full max-w-4xl place-items-center">
+                <div className="grid w-full overflow-hidden rounded-[28px] border border-[var(--app-border)] bg-[var(--app-bg)] shadow-[0_24px_80px_rgba(0,0,0,0.08)] md:grid-cols-[1.05fr_0.95fr]">
+                    <section className="hidden min-h-[560px] flex-col justify-between border-r border-[var(--app-border)] bg-[var(--app-subtle-bg)] p-10 md:flex">
+                        <div className="flex items-center gap-3">
+                            <img src="/icon.svg" alt="" className="h-12 w-12 rounded-2xl" />
+                            <div>
+                                <div className="text-lg font-semibold tracking-tight">Orbix</div>
+                                <div className="text-xs text-[var(--app-hint)]">{t('login.hero.kicker')}</div>
+                            </div>
                         </div>
-                    )}
+                        <div className="space-y-6">
+                            <h1 className="max-w-sm text-4xl font-semibold leading-[1.08] tracking-[-0.035em]">
+                                {t('login.hero.title')}
+                            </h1>
+                            <p className="max-w-sm text-sm leading-6 text-[var(--app-hint)]">
+                                {t('login.hero.description')}
+                            </p>
+                            <div className="flex flex-wrap gap-2 text-xs text-[var(--app-hint)]">
+                                {['Codex', 'Claude Code', 'Cursor Agent'].map((provider) => (
+                                    <span key={provider} className="rounded-full border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-1.5">{provider}</span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="text-xs text-[var(--app-hint)]">{t('login.hero.trust')}</div>
+                    </section>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading || !accessToken.trim()}
-                        aria-busy={isLoading}
-                        className="w-full py-2.5 rounded-lg bg-[var(--app-button)] text-[var(--app-button-text)] font-medium disabled:opacity-50 hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Spinner size="sm" label={null} className="text-[var(--app-button-text)]" />
-                                {isBindMode ? t('login.bind.submitting') : t('login.submitting')}
-                            </>
-                        ) : (
-                            submitLabel
+                    <section className="flex min-h-[560px] flex-col justify-center p-6 sm:p-10">
+                        <div className="mb-8 flex items-center gap-3 md:hidden">
+                            <img src="/icon.svg" alt="" className="h-12 w-12 rounded-2xl" />
+                            <div className="text-xl font-semibold tracking-tight">Orbix</div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="text-2xl font-semibold tracking-tight">{title}</div>
+                            <div className="text-sm leading-6 text-[var(--app-hint)]">
+                                {subtitle}
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+                            <label className="block space-y-2">
+                                <span className="text-xs font-medium text-[var(--app-hint)]">{t('login.placeholder')}</span>
+                                <input
+                                    type="password"
+                                    value={accessToken}
+                                    onChange={(e) => setAccessToken(e.target.value)}
+                                    placeholder={t('login.placeholder')}
+                                    autoComplete="current-password"
+                                    disabled={isLoading}
+                                    className="h-12 w-full rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg)] px-4 text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:border-[var(--app-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--app-link-muted)] disabled:opacity-50"
+                                />
+                            </label>
+
+                            {displayError && <div className="text-sm text-red-500">{displayError}</div>}
+
+                            <button
+                                type="submit"
+                                disabled={isLoading || !accessToken.trim()}
+                                aria-busy={isLoading}
+                                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--app-button)] px-4 font-medium text-[var(--app-button-text)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                {isLoading ? <><Spinner size="sm" label={null} className="text-[var(--app-button-text)]" />{isBindMode ? t('login.bind.submitting') : t('login.submitting')}</> : submitLabel}
+                            </button>
+                        </form>
+
+                        {!isBindMode && (
+                            <div className="mt-5 flex items-center justify-between text-xs text-[var(--app-hint)]">
+                                <a href="https://orbix.run/docs" target="_blank" rel="noopener noreferrer" className="rounded-lg py-2 hover:text-[var(--app-fg)]">{t('login.help')}</a>
+                                <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>
+                                    <DialogTrigger asChild>
+                                        <button type="button" className="rounded-lg py-2 hover:text-[var(--app-fg)]">Hub · {props.serverUrl ? t('login.server.custom') : t('login.server.default')}</button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-md">
+                                        <DialogHeader><DialogTitle>{t('login.server.title')}</DialogTitle><DialogDescription>{t('login.server.description')}</DialogDescription></DialogHeader>
+                                        <form onSubmit={handleSaveServer} className="space-y-4">
+                                            <div className="text-xs text-[var(--app-hint)]">{t('login.server.current')} {serverSummary}</div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-medium">{t('login.server.origin')}</label>
+                                                <input type="url" value={serverInput} onChange={(e) => { setServerInput(e.target.value); setServerError(null) }} placeholder={t('login.server.placeholder')} className="w-full rounded-2xl border border-[var(--app-border)] bg-[var(--app-bg)] px-3 py-2.5 text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-2 focus:ring-[var(--app-link-muted)]" />
+                                                <div className="text-[11px] text-[var(--app-hint)]">{t('login.server.hint')}</div>
+                                            </div>
+                                            {serverError && <div className="text-sm text-red-500">{serverError}</div>}
+                                            <div className="flex items-center justify-end gap-2">
+                                                {props.serverUrl && <Button type="button" variant="outline" onClick={handleClearServer}>{t('login.server.useSameOrigin')}</Button>}
+                                                <Button type="submit">{t('login.server.save')}</Button>
+                                            </div>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
                         )}
-                    </button>
-                </form>
 
-                {/* Help links */}
-                {!isBindMode && (
-                    <div className="flex items-center justify-between text-xs text-[var(--app-hint)]">
-                        <a href="https://orbix.run/docs" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--app-fg)]">
-                            {t('login.help')}
-                        </a>
-                        <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>
-                            <DialogTrigger asChild>
-                                <button type="button" className="underline hover:text-[var(--app-fg)]">
-                                    Hub {props.serverUrl ? `${t('login.server.custom')}` : `${t('login.server.default')}`}
-                                </button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                    <DialogTitle>{t('login.server.title')}</DialogTitle>
-                                    <DialogDescription>
-                                        {t('login.server.description')}
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <form onSubmit={handleSaveServer} className="space-y-4">
-                                    <div className="text-xs text-[var(--app-hint)]">
-                                        {t('login.server.current')} {serverSummary}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-medium">{t('login.server.origin')}</label>
-                                        <input
-                                            type="url"
-                                            value={serverInput}
-                                            onChange={(e) => {
-                                                setServerInput(e.target.value)
-                                                setServerError(null)
-                                            }}
-                                            placeholder={t('login.server.placeholder')}
-                                            className="w-full px-3 py-2.5 rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--app-fg)] placeholder:text-[var(--app-hint)] focus:outline-none focus:ring-2 focus:ring-[var(--app-button)] focus:border-transparent"
-                                        />
-                                        <div className="text-[11px] text-[var(--app-hint)]">
-                                            {t('login.server.hint')}
-                                        </div>
-                                    </div>
-
-                                    {serverError && (
-                                        <div className="text-sm text-red-500">
-                                            {serverError}
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-end gap-2">
-                                        {props.serverUrl && (
-                                            <Button type="button" variant="outline" onClick={handleClearServer}>
-                                                {t('login.server.useSameOrigin')}
-                                            </Button>
-                                        )}
-                                        <Button type="submit">
-                                            {t('login.server.save')}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-                )}
-            </div>
-
-            {/* Footer */}
-            <div className="absolute bottom-4 left-0 right-0 text-center text-xs text-[var(--app-hint)] space-y-1">
-                <div>{t('login.footer')} <span className="text-red-500">♥</span> {t('login.footer.for')}</div>
-                <div>{t('login.footer.copyright')} {new Date().getFullYear()} ORBIX</div>
+                        <div className="mt-10 border-t border-[var(--app-border)] pt-5 text-xs leading-5 text-[var(--app-hint)]">
+                            {t('login.footer')} · {t('login.footer.copyright')} {new Date().getFullYear()} Orbix
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     )
