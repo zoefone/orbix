@@ -1,49 +1,36 @@
-const FLAVOR_BADGES: Record<string, { label: string; colors: string }> = {
-    claude: {
-        label: 'Cl',
-        colors: 'bg-[#d97706] text-white',
-    },
-    codex: {
-        label: 'Cx',
-        colors: 'bg-[#111827] text-white',
-    },
-    cursor: {
-        label: 'Cu',
-        colors: 'bg-[#0f766e] text-white',
-    },
-    gemini: {
-        label: 'Gm',
-        colors: 'bg-[#2563eb] text-white',
-    },
-    kimi: {
-        label: 'Km',
-        colors: 'bg-[#7c3aed] text-white',
-    },
-    pi: {
-        label: 'Pi',
-        colors: 'bg-[#5b21b6] text-white',
-    },
-    opencode: {
-        label: 'Op',
-        colors: 'bg-[#15803d] text-white',
-    },
-}
+import type { ComponentType, SVGProps } from 'react'
+import ClaudeCode from '@lobehub/icons/es/ClaudeCode/components/Mono'
+import Codex from '@lobehub/icons/es/Codex/components/Mono'
+import Cursor from '@lobehub/icons/es/Cursor/components/Mono'
+import Gemini from '@lobehub/icons/es/Gemini/components/Mono'
+import Kimi from '@lobehub/icons/es/Kimi/components/Mono'
+import OpenCode from '@lobehub/icons/es/OpenCode/components/Mono'
 
-const UNKNOWN_FLAVOR_BADGE = {
-    label: 'Un',
-    colors: 'bg-[var(--app-secondary-bg)] text-[var(--app-hint)]',
+type ProviderIcon = ComponentType<SVGProps<SVGSVGElement>>
+
+const PROVIDER_ICONS: Record<string, ProviderIcon> = {
+    claude: ClaudeCode,
+    codex: Codex,
+    cursor: Cursor,
+    gemini: Gemini,
+    kimi: Kimi,
+    opencode: OpenCode,
 }
 
 export function AgentFlavorIcon({ flavor, className }: { flavor?: string | null; className?: string }) {
     const normalized = (flavor ?? '').trim().toLowerCase()
-    const badge = FLAVOR_BADGES[normalized] ?? UNKNOWN_FLAVOR_BADGE
+    const Icon = PROVIDER_ICONS[normalized]
 
     return (
         <span
             aria-hidden="true"
-            className={`inline-flex items-center justify-center rounded-sm text-[8px] font-semibold leading-none ${badge.colors} ${className ?? 'h-4 w-4'}`}
+            className={`inline-flex items-center justify-center rounded-md bg-[var(--app-subtle-bg)] p-[2px] text-[var(--app-fg)] ${className ?? 'h-4 w-4'}`}
         >
-            {badge.label}
+            {Icon ? (
+                <Icon className="h-full w-full" />
+            ) : (
+                <span className="text-[9px] font-semibold leading-none">{normalized === 'pi' ? 'π' : '?'}</span>
+            )}
         </span>
     )
 }
