@@ -812,8 +812,8 @@ export default function SettingsPage() {
                         <div className="px-3 py-2 text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wide">
                             {t('settings.notifications.title')}
                         </div>
-                        <div className="flex items-center justify-between gap-4 px-3 py-3">
-                            <div className="min-w-0">
+                        <div className="px-3 py-3">
+                            <div>
                                 <div className="flex items-center gap-2 text-[var(--app-fg)]">
                                     <span
                                         className={`h-2 w-2 shrink-0 rounded-full ${pushNotifications.isSubscribed ? 'bg-emerald-500' : 'bg-[var(--app-hint)]'}`}
@@ -833,39 +833,39 @@ export default function SettingsPage() {
                                                     : t('settings.notifications.description')}
                                 </p>
                             </div>
-                            {pushNotifications.availability === 'available' && pushNotifications.permission !== 'denied' ? (
-                                <div className="flex shrink-0 flex-col gap-2">
+                        </div>
+                        {pushNotifications.availability === 'available' && pushNotifications.permission !== 'denied' ? (
+                            <div className="flex gap-2 px-3 pb-3">
+                                {pushNotifications.isSubscribed ? (
                                     <button
                                         type="button"
                                         disabled={isNotificationBusy || isNotificationTestBusy}
-                                        onClick={() => void handleNotificationToggle()}
-                                        className={`min-h-11 min-w-20 rounded-xl px-3 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${
-                                            pushNotifications.isSubscribed
-                                                ? 'border border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
-                                                : 'bg-[var(--app-fg)] text-[var(--app-bg)] hover:opacity-90'
-                                        }`}
+                                        onClick={() => void handleNotificationTest()}
+                                        className="min-h-11 flex-1 rounded-xl bg-[var(--app-fg)] px-3 text-sm font-semibold text-[var(--app-bg)] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
                                     >
-                                        {isNotificationBusy
-                                            ? t('settings.notifications.working')
-                                            : pushNotifications.isSubscribed
-                                                ? t('settings.notifications.disable')
-                                                : t('settings.notifications.enable')}
+                                        {isNotificationTestBusy
+                                            ? t('settings.notifications.testing')
+                                            : t('settings.notifications.test')}
                                     </button>
-                                    {pushNotifications.isSubscribed ? (
-                                        <button
-                                            type="button"
-                                            disabled={isNotificationBusy || isNotificationTestBusy}
-                                            onClick={() => void handleNotificationTest()}
-                                            className="min-h-11 min-w-20 rounded-xl bg-[var(--app-fg)] px-3 text-sm font-semibold text-[var(--app-bg)] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
-                                        >
-                                            {isNotificationTestBusy
-                                                ? t('settings.notifications.testing')
-                                                : t('settings.notifications.test')}
-                                        </button>
-                                    ) : null}
-                                </div>
-                            ) : null}
-                        </div>
+                                ) : null}
+                                <button
+                                    type="button"
+                                    disabled={isNotificationBusy || isNotificationTestBusy}
+                                    onClick={() => void handleNotificationToggle()}
+                                    className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${
+                                        pushNotifications.isSubscribed
+                                            ? 'border border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
+                                            : 'bg-[var(--app-fg)] text-[var(--app-bg)] hover:opacity-90'
+                                    }`}
+                                >
+                                    {isNotificationBusy
+                                        ? t('settings.notifications.working')
+                                        : pushNotifications.isSubscribed
+                                            ? t('settings.notifications.disable')
+                                            : t('settings.notifications.enable')}
+                                </button>
+                            </div>
+                        ) : null}
                         {(notificationFeedback || pushNotifications.error) ? (
                             <p role="status" className="px-3 pb-3 text-xs text-[var(--app-hint)]">
                                 {notificationFeedback === 'test-sent'
