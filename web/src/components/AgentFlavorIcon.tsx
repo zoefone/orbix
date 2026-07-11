@@ -24,7 +24,7 @@ export function AgentFlavorIcon({ flavor, className }: { flavor?: string | null;
     return (
         <span
             aria-hidden="true"
-            className={`inline-flex items-center justify-center rounded-md bg-[var(--app-subtle-bg)] p-[2px] text-[var(--app-fg)] ${className ?? 'h-4 w-4'}`}
+            className={`inline-flex items-center justify-center rounded-md bg-[var(--app-subtle-bg)] p-px text-[var(--app-fg)] ${className ?? 'h-4 w-4'}`}
         >
             {Icon ? (
                 <Icon className="h-full w-full" />
