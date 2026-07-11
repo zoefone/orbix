@@ -1,0 +1,28 @@
+/**
+ * OpenCode-specific system prompt for change_title tool.
+ *
+ * OpenCode exposes MCP tools with the naming pattern: <server-name>_<tool-name>
+ * The orbix MCP server exposes `change_title`, so it's called as `orbix_change_title`.
+ */
+
+import { trimIdent } from '@/utils/trimIdent';
+
+/**
+ * Title instruction for OpenCode to call the orbix MCP tool.
+ */
+export const TITLE_INSTRUCTION = trimIdent(`
+    Use the title tool sparingly. For a new chat, call the tool "orbix_change_title" once after the user's initial request is clear, and set a concise task title. Do not rename the chat for routine progress, substeps, implementation details, or a slightly better wording. Rename only when the user's primary objective changes substantially and the existing title would be misleading.
+    When you create or find a local image file that the user should see, call the tool "orbix_display_image" with the image path so ORBIX can show it inline.
+`);
+
+/**
+ * The system prompt to inject for OpenCode sessions.
+ */
+export const opencodeSystemPrompt = TITLE_INSTRUCTION;
+
+/**
+ * Instruction prepended to OpenCode prompts while ORBIX plan mode is active.
+ */
+export const PLAN_MODE_INSTRUCTION = trimIdent(`
+    You are in plan mode. Do not execute tools or make changes. Analyze the request, ask clarifying questions if needed, and respond with a concise implementation plan only.
+`);

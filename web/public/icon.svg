@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Orbix">
+  <rect width="512" height="512" rx="116" fill="#0a0a0a"/>
+  <circle cx="256" cy="256" r="132" fill="none" stroke="#fff" stroke-width="42"/>
+  <path d="M103 300c43 98 155 153 258 111 45-18 82-50 106-91" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".56"/>
+  <circle cx="424" cy="314" r="30" fill="#fff"/>
+</svg>

@@ -1,0 +1,800 @@
+import { EventEmitter } from 'node:events'
+import { randomUUID } from 'node:crypto'
+import { io, type Socket } from 'socket.io-client'
+import axios from 'axios'
+import type { ZodType } from 'zod'
+import { logger } from '@/ui/logger'
+import { backoff } from '@/utils/time'
+import { apiValidationError } from '@/utils/errorUtils'
+import { AsyncLock } from '@/utils/lock'
+import type { RawJSONLines } from '@/claude/types'
+import { configuration } from '@/configuration'
+import { AGENT_MESSAGE_PAYLOAD_TYPE } from "@orbix/protocol"
+import type { SessionEndReason } from '@orbix/protocol'
+import type { ClientToServerEvents, ServerToClientEvents, Update } from '@orbix/protocol'
+import {
+    TerminalClosePayloadSchema,
+    TerminalOpenPayloadSchema,
+    TerminalResizePayloadSchema,
+    TerminalWritePayloadSchema
+} from '@orbix/protocol'
+import type {
+    AgentState,
+    MessageContent,
+    MessageMeta,
+    Metadata,
+    SessionCollaborationMode,
+    Session,
+    SessionModel,
+    SessionPermissionMode,
+    UserMessage
+} from './types'
+import { AgentStateSchema, CliMessagesResponseSchema, MetadataSchema, UserMessageSchema } from './types'
+import { RpcHandlerManager } from './rpc/RpcHandlerManager'
+import { registerCommonHandlers } from '../modules/common/registerCommonHandlers'
+import { cleanupUploadDir } from '../modules/common/handlers/uploads'
+import { TerminalManager } from '@/terminal/TerminalManager'
+import { applyVersionedAck } from './versionedUpdate'
+import { buildHubRequestHeaders, buildSocketIoExtraHeaderOptions } from './hubExtraHeaders'
+
+/**
+ * XML tags that Claude Code injects as `type:'user'` messages.
+ * These are internal bookkeeping, not text the human actually typed.
+ */
+const SYSTEM_INJECTION_PREFIXES = [
+    '<task-notification>',
+    '<command-name>',
+    '<local-command-caveat>',
+    '<system-reminder>',
+]
+
+function extractRawUserTextContent(content: unknown): string | null {
+    if (typeof content === 'string') {
+        return content
+    }
+
+    if (!Array.isArray(content)) {
+        return null
+    }
+
+    const parts = content
+        .map((block) => {
+            if (!block || typeof block !== 'object' || Array.isArray(block)) return null
+            const record = block as Record<string, unknown>
+            return record.type === 'text' && typeof record.text === 'string'
+                ? record.text
+                : null
+        })
+        .filter((text): text is string => text !== null)
+
+    return parts.length > 0 ? parts.join('\n') : null
+}
+
+/**
+ * Returns true if a JSONL message should be classified as a user-role message
+ * (i.e., text typed by a real human) rather than an agent-role message.
+ *
+ * Claude Code injects system messages (task notifications, command caveats, …)
+ * into the JSONL log as `type:'user'` entries so the model sees them in
+ * context.  All metadata fields (`userType`, `isMeta`, …) are identical to
+ * genuine user messages, so the only reliable signal is the message content
+ * itself: injected messages always start with a well-known XML tag.
+ */
+export function isExternalUserMessage(body: RawJSONLines): body is Extract<RawJSONLines, { type: 'user' }> {
+    if (body.type !== 'user') return false
+    const text = extractRawUserTextContent(body.message.content)
+    if (text === null) return false
+    if (body.isSidechain === true) return false
+    if (body.isMeta === true) return false
+
+    const trimmed = text.trimStart()
+    for (const prefix of SYSTEM_INJECTION_PREFIXES) {
+        if (trimmed.startsWith(prefix)) return false
+    }
+    return true
+}
+
+/**
+ * Dedup filter for messages arriving on the realtime socket and via reconnect
+ * backfill.  Keyed by message id (with a bounded LRU) and falls back to the
+ * legacy seq cursor for messages that lack an id.
+ *
+ * Why id-first: scheduled messages keep the seq assigned at insertion time, so
+ * a row scheduled for T+1h (seq=10) can be released after a later immediate
+ * message (seq=11) has already advanced the cursor.  A pure seq <= cursor
+ * filter would silently drop the mature emit.  See ORBIX Bot R3 finding #1.
+ */
+export class IncomingMessageFilter {
+    private readonly seenIds = new Set<string>()
+    private readonly capacity: number
+    private lastSeenSeq: number | null = null
+
+    constructor(capacity = 256) {
+        this.capacity = capacity
+    }
+
+    cursorSeq(): number | null {
+        return this.lastSeenSeq
+    }
+
+    /** Returns true if this message should be processed; false to drop as a duplicate. */
+    accept(message: { id?: string | null; seq?: number | null }): boolean {
+        const id = typeof message.id === 'string' && message.id.length > 0 ? message.id : null
+        if (id && this.seenIds.has(id)) {
+            // Refresh recency: the hub re-emits the same id every 5 s until the
+            // CLI acks (releaseMatureScheduledMessages contract).  Without a
+            // delete+re-add the entry stays at its first-insert position and can
+            // be evicted by a burst of unrelated ids before the ack lands —
+            // the next re-emit would then be treated as new and double-deliver.
+            this.seenIds.delete(id)
+            this.seenIds.add(id)
+            return false
+        }
+
+        const seq = typeof message.seq === 'number' ? message.seq : null
+        if (!id && seq !== null && this.lastSeenSeq !== null && seq <= this.lastSeenSeq) {
+            return false
+        }
+
+        if (id) {
+            this.seenIds.add(id)
+            if (this.seenIds.size > this.capacity) {
+                // Set iteration is insertion-ordered; with delete+re-add on dedup hit
+                // (above) this becomes a true LRU eviction.
+                const oldest = this.seenIds.values().next().value
+                if (oldest !== undefined) this.seenIds.delete(oldest)
+            }
+        }
+        if (seq !== null) {
+            this.lastSeenSeq = Math.max(this.lastSeenSeq ?? 0, seq)
+        }
+        return true
+    }
+}
+
+export class ApiSessionClient extends EventEmitter {
+    private readonly token: string
+    readonly sessionId: string
+    private metadata: Metadata | null
+    private metadataVersion: number
+    private agentState: AgentState | null
+    private agentStateVersion: number
+    private readonly socket: Socket<ServerToClientEvents, ClientToServerEvents>
+    private pendingMessages: { message: UserMessage; localId?: string }[] = []
+    private pendingMessageCallback: ((message: UserMessage, localId?: string) => void) | null = null
+    private cancelQueuedMessageCallback: ((localId: string) => boolean) | null = null
+    private readonly incomingFilter = new IncomingMessageFilter()
+    private backfillInFlight: Promise<void> | null = null
+    private needsBackfill = false
+    private hasConnectedOnce = false
+    readonly rpcHandlerManager: RpcHandlerManager
+    private readonly terminalManager: TerminalManager
+    private agentStateLock = new AsyncLock()
+    private metadataLock = new AsyncLock()
+
+    constructor(token: string, session: Session) {
+        super()
+        this.token = token
+        this.sessionId = session.id
+        this.metadata = session.metadata
+        this.metadataVersion = session.metadataVersion
+        this.agentState = session.agentState
+        this.agentStateVersion = session.agentStateVersion
+
+        this.rpcHandlerManager = new RpcHandlerManager({
+            scopePrefix: this.sessionId,
+            logger: (msg, data) => logger.debug(msg, data)
+        })
+
+        if (this.metadata?.path) {
+            registerCommonHandlers(this.rpcHandlerManager, this.metadata.path)
+        }
+
+        this.socket = io(`${configuration.apiUrl}/cli`, {
+            auth: {
+                token: this.token,
+                clientType: 'session-scoped' as const,
+                sessionId: this.sessionId
+            },
+            path: '/socket.io/',
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            transports: ['websocket'],
+            autoConnect: false,
+            ...buildSocketIoExtraHeaderOptions()
+        })
+
+        this.terminalManager = new TerminalManager({
+            sessionId: this.sessionId,
+            getSessionPath: () => this.metadata?.path ?? null,
+            onReady: (payload) => this.socket.emit('terminal:ready', payload),
+            onOutput: (payload) => this.socket.emit('terminal:output', payload),
+            onExit: (payload) => this.socket.emit('terminal:exit', payload),
+            onError: (payload) => this.socket.emit('terminal:error', payload)
+        })
+
+        this.socket.on('connect', () => {
+            logger.debug('Socket connected successfully')
+            this.rpcHandlerManager.onSocketConnect(this.socket)
+            if (this.hasConnectedOnce) {
+                this.needsBackfill = true
+            }
+            void this.backfillIfNeeded()
+            this.hasConnectedOnce = true
+            this.socket.emit('session-alive', {
+                sid: this.sessionId,
+                time: Date.now(),
+                thinking: false
+            })
+        })
+
+        this.socket.on('rpc-request', async (data: { method: string; params: string }, callback: (response: string) => void) => {
+            callback(await this.rpcHandlerManager.handleRequest(data))
+        })
+
+        this.socket.on('disconnect', (reason) => {
+            logger.debug('[API] Socket disconnected:', reason)
+            this.rpcHandlerManager.onSocketDisconnect()
+            this.terminalManager.closeAll()
+            if (this.hasConnectedOnce) {
+                this.needsBackfill = true
+            }
+        })
+
+        this.socket.on('connect_error', (error) => {
+            logger.debug('[API] Socket connection error:', error)
+            this.rpcHandlerManager.onSocketDisconnect()
+        })
+
+        this.socket.on('error', (payload) => {
+            logger.debug('[API] Socket error:', payload)
+        })
+
+        const handleTerminalEvent = <T extends { sessionId: string }>(
+            schema: ZodType<T>,
+            handler: (payload: T) => void
+        ) => (data: unknown) => {
+            const parsed = schema.safeParse(data)
+            if (!parsed.success) {
+                return
+            }
+            if (parsed.data.sessionId !== this.sessionId) {
+                return
+            }
+            handler(parsed.data)
+        }
+
+        this.socket.on('terminal:open', handleTerminalEvent(TerminalOpenPayloadSchema, (payload) => {
+            this.terminalManager.create(payload.terminalId, payload.cols, payload.rows)
+        }))
+
+        this.socket.on('terminal:write', handleTerminalEvent(TerminalWritePayloadSchema, (payload) => {
+            this.terminalManager.write(payload.terminalId, payload.data)
+        }))
+
+        this.socket.on('terminal:resize', handleTerminalEvent(TerminalResizePayloadSchema, (payload) => {
+            this.terminalManager.resize(payload.terminalId, payload.cols, payload.rows)
+        }))
+
+        this.socket.on('terminal:close', handleTerminalEvent(TerminalClosePayloadSchema, (payload) => {
+            this.terminalManager.close(payload.terminalId)
+        }))
+
+        this.socket.on('update', (data: Update, ack?: (response: { removed: boolean }) => void) => {
+            try {
+                if (!data.body) return
+
+                if (data.body.t === 'new-message') {
+                    this.handleIncomingMessage(data.body.message)
+                    return
+                }
+
+                if (data.body.t === 'cancel-queued-message') {
+                    const removed = (data.body.localId && this.cancelQueuedMessageCallback)
+                        ? this.cancelQueuedMessageCallback(data.body.localId)
+                        : false
+                    ack?.({ removed })
+                    return
+                }
+
+                if (data.body.t === 'update-session') {
+                    if (data.body.metadata && data.body.metadata.version > this.metadataVersion) {
+                        const parsed = MetadataSchema.safeParse(data.body.metadata.value)
+                        if (parsed.success) {
+                            this.metadata = parsed.data
+                        } else {
+                            logger.debug('[API] Ignoring invalid metadata update', { version: data.body.metadata.version })
+                        }
+                        this.metadataVersion = data.body.metadata.version
+                    }
+                    if (data.body.agentState && data.body.agentState.version > this.agentStateVersion) {
+                        const next = data.body.agentState.value
+                        if (next == null) {
+                            this.agentState = null
+                        } else {
+                            const parsed = AgentStateSchema.safeParse(next)
+                            if (parsed.success) {
+                                this.agentState = parsed.data
+                            } else {
+                                logger.debug('[API] Ignoring invalid agentState update', { version: data.body.agentState.version })
+                            }
+                        }
+                        this.agentStateVersion = data.body.agentState.version
+                    }
+                    return
+                }
+
+                this.emit('message', data.body)
+            } catch (error) {
+                logger.debug('[SOCKET] [UPDATE] [ERROR] Error handling update', { error })
+            }
+        })
+
+        this.socket.connect()
+    }
+
+    onUserMessage(callback: (data: UserMessage, localId?: string) => void): void {
+        this.pendingMessageCallback = callback
+        while (this.pendingMessages.length > 0) {
+            const pending = this.pendingMessages.shift()!
+            callback(pending.message, pending.localId)
+        }
+    }
+
+    onCancelQueuedMessage(callback: (localId: string) => boolean): void {
+        this.cancelQueuedMessageCallback = callback
+    }
+
+    private enqueueUserMessage(message: UserMessage, localId?: string): void {
+        if (this.pendingMessageCallback) {
+            this.pendingMessageCallback(message, localId)
+        } else {
+            this.pendingMessages.push({ message, localId })
+        }
+    }
+
+    private handleIncomingMessage(message: { id?: string; seq?: number; localId?: string | null; content: unknown }): void {
+        if (!this.incomingFilter.accept({ id: message.id, seq: message.seq })) {
+            return
+        }
+
+        const userResult = UserMessageSchema.safeParse(message.content)
+        if (userResult.success) {
+            this.enqueueUserMessage(userResult.data, message.localId ?? undefined)
+            return
+        }
+
+        this.emit('message', message.content)
+    }
+
+    private async backfillIfNeeded(): Promise<void> {
+        if (!this.needsBackfill) {
+            return
+        }
+        try {
+            await this.backfillMessages()
+            this.needsBackfill = false
+        } catch (error) {
+            logger.debug('[API] Backfill failed', error)
+            this.needsBackfill = true
+        }
+    }
+
+    private async backfillMessages(): Promise<void> {
+        if (this.backfillInFlight) {
+            await this.backfillInFlight
+            return
+        }
+
+        const startSeq = this.incomingFilter.cursorSeq()
+        if (startSeq === null) {
+            logger.debug('[API] Skipping backfill because no last-seen message sequence is available')
+            return
+        }
+
+        const limit = 200
+        const run = async () => {
+            let cursor = startSeq
+            while (true) {
+                const response = await axios.get(
+                    `${configuration.apiUrl}/cli/sessions/${encodeURIComponent(this.sessionId)}/messages`,
+                    {
+                        params: { afterSeq: cursor, limit },
+                        headers: buildHubRequestHeaders({
+                            Authorization: `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }),
+                        timeout: 15_000
+                    }
+                )
+
+                const parsed = CliMessagesResponseSchema.safeParse(response.data)
+                if (!parsed.success) {
+                    throw apiValidationError('Invalid /cli/sessions/:id/messages response', response)
+                }
+
+                const messages = parsed.data.messages
+                if (messages.length === 0) {
+                    break
+                }
+
+                let maxSeq = cursor
+                for (const message of messages) {
+                    if (typeof message.seq === 'number') {
+                        if (message.seq > maxSeq) {
+                            maxSeq = message.seq
+                        }
+                    }
+                    this.handleIncomingMessage(message)
+                }
+
+                const observedSeq = this.incomingFilter.cursorSeq() ?? maxSeq
+                const nextCursor = Math.max(maxSeq, observedSeq)
+                if (nextCursor <= cursor) {
+                    logger.debug('[API] Backfill stopped due to non-advancing cursor', {
+                        cursor,
+                        maxSeq,
+                        observedSeq
+                    })
+                    break
+                }
+
+                cursor = nextCursor
+                if (messages.length < limit) {
+                    break
+                }
+            }
+        }
+
+        this.backfillInFlight = run().finally(() => {
+            this.backfillInFlight = null
+        })
+
+        await this.backfillInFlight
+    }
+
+    sendClaudeSessionMessage(body: RawJSONLines): void {
+        let content: MessageContent
+
+        if (isExternalUserMessage(body)) {
+            content = {
+                role: 'user',
+                content: {
+                    type: 'text',
+                    text: extractRawUserTextContent(body.message.content) ?? ''
+                },
+                meta: {
+                    sentFrom: 'cli'
+                }
+            }
+        } else {
+            content = {
+                role: 'agent',
+                content: {
+                    type: 'output',
+                    data: body
+                },
+                meta: {
+                    sentFrom: 'cli'
+                }
+            }
+        }
+
+        this.socket.emit('message', {
+            sid: this.sessionId,
+            message: content
+        })
+
+        if (body.type === 'summary' && 'summary' in body && 'leafUuid' in body) {
+            this.updateMetadata((metadata) => ({
+                ...metadata,
+                summary: {
+                    text: body.summary,
+                    updatedAt: Date.now()
+                }
+            }))
+        }
+    }
+
+    sendUserMessage(text: string, meta?: MessageMeta): void {
+        if (!text) {
+            return
+        }
+
+        const content: MessageContent = {
+            role: 'user',
+            content: {
+                type: 'text',
+                text
+            },
+            meta: {
+                sentFrom: 'cli',
+                ...(meta ?? {})
+            }
+        }
+
+        this.socket.emit('message', {
+            sid: this.sessionId,
+            message: content
+        })
+    }
+
+    sendAgentMessage(body: unknown): void {
+        const content = {
+            role: 'agent',
+            content: {
+                type: AGENT_MESSAGE_PAYLOAD_TYPE,
+                data: body
+            },
+            meta: {
+                sentFrom: 'cli'
+            }
+        }
+        this.socket.emit('message', {
+            sid: this.sessionId,
+            message: content
+        })
+    }
+
+    sendSessionEvent(event: {
+        type: 'switch'
+        mode: 'local' | 'remote'
+    } | {
+        type: 'message'
+        message: string
+    } | {
+        type: 'permission-mode-changed'
+        mode: SessionPermissionMode
+    } | {
+        type: 'ready'
+    }, id?: string): void {
+        const content = {
+            role: 'agent',
+            content: {
+                id: id ?? randomUUID(),
+                type: 'event',
+                data: event
+            }
+        }
+
+        this.socket.emit('message', {
+            sid: this.sessionId,
+            message: content
+        })
+    }
+
+    keepAlive(
+        thinking: boolean,
+        mode: 'local' | 'remote',
+        runtime?: {
+            permissionMode?: SessionPermissionMode
+            model?: SessionModel
+            modelReasoningEffort?: string | null
+            effort?: string | null
+            serviceTier?: string | null
+            collaborationMode?: SessionCollaborationMode
+        }
+    ): void {
+        this.socket.volatile.emit('session-alive', {
+            sid: this.sessionId,
+            time: Date.now(),
+            thinking,
+            mode,
+            ...(runtime ?? {})
+        })
+    }
+
+    /** Hub waits for this before mergeSessions on Cursor ACP reopen (tiann/hapi#939). */
+    emitSessionReady(): void {
+        this.socket.emit('session-ready', {
+            sid: this.sessionId,
+            time: Date.now()
+        })
+    }
+
+    emitMessagesConsumed(localIds: string[], options?: { clearQueuedThinkingGrace?: boolean }): void {
+        if (localIds.length === 0) return
+        // `clearQueuedThinkingGrace` is an opt-in signal for the hub to drop
+        // the 15s queued-thinking grace immediately. Only synchronous handlers
+        // that will never call `onThinkingChange(true)` (slash commands handled
+        // inside `onUserMessage`) should set it — normal queue drains still
+        // need the grace so the spinner doesn't flicker between drain and
+        // backend.prompt start.
+        const payload: { sid: string; localIds: string[]; clearQueuedThinkingGrace?: boolean } = {
+            sid: this.sessionId,
+            localIds
+        }
+        if (options?.clearQueuedThinkingGrace) {
+            payload.clearQueuedThinkingGrace = true
+        }
+        this.socket.emit('messages-consumed', payload)
+    }
+
+    sendSessionDeath(reason?: SessionEndReason): void {
+        void cleanupUploadDir(this.sessionId)
+        this.socket.emit('session-end', { sid: this.sessionId, time: Date.now(), reason })
+    }
+
+    updateMetadata(handler: (metadata: Metadata) => Metadata): void {
+        this.metadataLock.inLock(async () => {
+            await backoff(async () => {
+                const current = this.metadata ?? ({} as Metadata)
+                const updated = handler(current)
+
+                const answer = await this.socket.emitWithAck('update-metadata', {
+                    sid: this.sessionId,
+                    expectedVersion: this.metadataVersion,
+                    metadata: updated
+                }) as unknown
+
+                applyVersionedAck(answer, {
+                    valueKey: 'metadata',
+                    parseValue: (value) => {
+                        const parsed = MetadataSchema.safeParse(value)
+                        return parsed.success ? parsed.data : null
+                    },
+                    applyValue: (value) => {
+                        this.metadata = value
+                    },
+                    applyVersion: (version) => {
+                        this.metadataVersion = version
+                    },
+                    logInvalidValue: (context, version) => {
+                        const suffix = context === 'success' ? 'ack' : 'version-mismatch ack'
+                        logger.debug(`[API] Ignoring invalid metadata value from ${suffix}`, { version })
+                    },
+                    invalidResponseMessage: 'Invalid update-metadata response',
+                    errorMessage: 'Metadata update failed',
+                    versionMismatchMessage: 'Metadata version mismatch'
+                })
+            })
+        })
+    }
+
+    updateAgentState(handler: (state: AgentState) => AgentState): void {
+        this.agentStateLock.inLock(async () => {
+            await backoff(async () => {
+                const current = this.agentState ?? ({} as AgentState)
+                const updated = handler(current)
+
+                const answer = await this.socket.emitWithAck('update-state', {
+                    sid: this.sessionId,
+                    expectedVersion: this.agentStateVersion,
+                    agentState: updated
+                }) as unknown
+
+                applyVersionedAck(answer, {
+                    valueKey: 'agentState',
+                    parseValue: (value) => {
+                        const parsed = AgentStateSchema.safeParse(value)
+                        return parsed.success ? parsed.data : null
+                    },
+                    applyValue: (value) => {
+                        this.agentState = value
+                    },
+                    applyVersion: (version) => {
+                        this.agentStateVersion = version
+                    },
+                    logInvalidValue: (context, version) => {
+                        const suffix = context === 'success' ? 'ack' : 'version-mismatch ack'
+                        logger.debug(`[API] Ignoring invalid agentState value from ${suffix}`, { version })
+                    },
+                    invalidResponseMessage: 'Invalid update-state response',
+                    errorMessage: 'Agent state update failed',
+                    versionMismatchMessage: 'Agent state version mismatch'
+                })
+            })
+        })
+    }
+
+    private async waitForConnected(timeoutMs: number): Promise<boolean> {
+        if (this.socket.connected) {
+            return true
+        }
+
+        this.socket.connect()
+
+        return await new Promise<boolean>((resolve) => {
+            let settled = false
+
+            const cleanup = () => {
+                this.socket.off('connect', onConnect)
+                clearTimeout(timeout)
+            }
+
+            const onConnect = () => {
+                if (settled) return
+                settled = true
+                cleanup()
+                resolve(true)
+            }
+
+            const timeout = setTimeout(() => {
+                if (settled) return
+                settled = true
+                cleanup()
+                resolve(false)
+            }, Math.max(0, timeoutMs))
+
+            this.socket.on('connect', onConnect)
+        })
+    }
+
+    private async drainLock(lock: AsyncLock, timeoutMs: number): Promise<boolean> {
+        if (timeoutMs <= 0) {
+            return false
+        }
+
+        return await new Promise<boolean>((resolve) => {
+            let settled = false
+            let timeout: ReturnType<typeof setTimeout> | null = null
+
+            const finish = (value: boolean) => {
+                if (settled) return
+                settled = true
+                if (timeout) {
+                    clearTimeout(timeout)
+                }
+                resolve(value)
+            }
+
+            timeout = setTimeout(() => finish(false), timeoutMs)
+
+            lock.inLock(async () => { })
+                .then(() => finish(true))
+                .catch(() => finish(false))
+        })
+    }
+
+    /**
+     * tiann/hapi#913: wait until any pending `update-metadata` writes have
+     * been acked by the hub (or the timeout elapses). `updateMetadata` is
+     * fire-and-forget at the call site because it's invoked on the hot path
+     * for every turn; this helper lets the few callers who actually need
+     * durability — fresh ACP session-id pre-registration is the canonical
+     * case — synchronously gate on persistence without changing every
+     * caller's signature.
+     *
+     * Returns true when the lock drained, false when the timeout fired.
+     */
+    async flushMetadata(timeoutMs: number = 5_000): Promise<boolean> {
+        return await this.drainLock(this.metadataLock, timeoutMs)
+    }
+
+    async flush(options?: { timeoutMs?: number }): Promise<void> {
+        const deadlineMs = Date.now() + (options?.timeoutMs ?? 5_000)
+
+        const remainingMs = () => Math.max(0, deadlineMs - Date.now())
+
+        await this.drainLock(this.metadataLock, remainingMs())
+        await this.drainLock(this.agentStateLock, remainingMs())
+
+        if (remainingMs() === 0) {
+            return
+        }
+
+        const connected = await this.waitForConnected(remainingMs())
+        if (!connected) {
+            return
+        }
+
+        const pingTimeoutMs = remainingMs()
+        if (pingTimeoutMs === 0) {
+            return
+        }
+
+        try {
+            await this.socket.timeout(pingTimeoutMs).emitWithAck('ping')
+        } catch {
+            // best effort
+        }
+    }
+
+    close(): void {
+        this.rpcHandlerManager.onSocketDisconnect()
+        this.terminalManager.closeAll()
+        this.socket.disconnect()
+    }
+}

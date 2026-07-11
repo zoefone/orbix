@@ -1,0 +1,17 @@
+{
+  "name": "orbix-docs",
+  "version": "1.0.0",
+  "description": "ORBIX Documentation",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "keywords": ["orbix", "ai", "agent", "documentation"],
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

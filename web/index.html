@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
+        />
+
+        <!-- PWA Meta Tags -->
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="description" content="Remote control for Codex, Claude Code, and Cursor Agent" />
+
+        <!-- iOS PWA Meta Tags -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Orbix" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+
+        <!-- Favicon -->
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" href="/icon.svg" sizes="any" type="image/svg+xml" />
+
+        <!-- Safari Pinned Tab -->
+        <link rel="mask-icon" href="/mask-icon.svg" color="#0a0a0a" />
+
+        <script>
+            (function () {
+                try {
+                    var raw = localStorage.getItem('orbix-font-scale')
+                    var scale = Number(raw)
+                    if (scale === 0.8 || scale === 0.9 || scale === 1 || scale === 1.1 || scale === 1.2) {
+                        document.documentElement.style.setProperty('--app-font-scale', String(scale))
+                    }
+                } catch (error) {
+                    // Ignore storage errors.
+                }
+            })()
+        </script>
+        <script>
+            (function () {
+                var lightColor = '#ffffff'
+                var darkColor = '#1c1c1e'
+
+                function getInitialScheme() {
+                    try {
+                        var appearance = localStorage.getItem('orbix-appearance')
+                        if (appearance === 'dark' || appearance === 'light') return appearance
+                    } catch (error) {
+                        // Ignore storage errors.
+                    }
+
+                    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                        ? 'dark'
+                        : 'light'
+                }
+
+                var scheme = getInitialScheme()
+                var color = scheme === 'dark' ? darkColor : lightColor
+                document.documentElement.setAttribute('data-theme', scheme)
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', color)
+            })()
+        </script>
+        <!-- Prevent flash of mismatched background on app launch -->
+        <style>
+            html { background: #fff }
+            html[data-theme="dark"] { background: #1c1c1e; color-scheme: dark }
+        </style>
+
+        <title>Orbix</title>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
+</html>
