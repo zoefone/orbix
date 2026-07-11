@@ -531,6 +531,10 @@ export default {
   'install.title': 'Install ORBIX',
   'install.description': 'Add ORBIX to your home screen for quick access.',
   'install.button': 'Install',
+  'install.close': 'Close install guide',
+  'install.ios.share': 'Tap the Share button in Safari’s toolbar.',
+  'install.ios.addToHome': 'Scroll down and choose Add to Home Screen.',
+  'install.ios.confirm': 'Tap Add in the top-right corner.',
 
   // Language switcher
   'language.title': 'Language',

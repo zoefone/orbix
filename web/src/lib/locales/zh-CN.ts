@@ -535,6 +535,10 @@ export default {
   'install.title': '安装 ORBIX',
   'install.description': '将 ORBIX 添加到主屏幕以便快速访问。',
   'install.button': '安装',
+  'install.close': '关闭安装指南',
+  'install.ios.share': '点击 Safari 工具栏中的“分享”按钮。',
+  'install.ios.addToHome': '向下滚动并选择“添加到主屏幕”。',
+  'install.ios.confirm': '点击右上角的“添加”。',
 
   // Language switcher
   'language.title': '语言',
