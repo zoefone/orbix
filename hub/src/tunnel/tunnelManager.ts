@@ -57,7 +57,7 @@ function getTunwgPath(): string {
 export interface TunnelConfig {
     localPort: number
     enabled: boolean
-    apiDomain?: string | null  // TUNWG_API - default: relay.orbix.run (official relay)
+    apiDomain?: string | null  // Optional custom TUNWG_API domain
     authKey?: string | null    // TUNWG_AUTH - default: orbix
     useRelay?: boolean         // TUNWG_RELAY
 }

@@ -109,13 +109,13 @@
     }
   },
   "installation": {
-    "title": "Get Started in Seconds",
-    "e2ee": "🔒 End-to-end encrypted with WireGuard + TLS",
+    "title": "Get Started",
+    "e2ee": "Use your own trusted HTTPS endpoint for remote access and phone notifications.",
     "npm": {
-      "step1": "1. Start the Server",
-      "step2": "2. Start a Coding Session",
-      "step3": "3. Open the URL",
-      "step3Hint": "URL and QR code shown in terminal"
+      "step1": "1. Clone the Rebuild",
+      "step2": "2. Install and Start the Hub",
+      "step3": "3. Connect Your Phone",
+      "step3Hint": "Open the Hub URL, enter its access token, then install the PWA"
     }
   },
   "cta": {

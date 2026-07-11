@@ -14,7 +14,7 @@
  *   bun run scripts/update-homebrew-formula.ts --version 0.1.0 --push
  *
  * Environment:
- *   HOMEBREW_TAP_REPO - Git URL of the tap repository (default: https://github.com/tiann/homebrew-tap.git)
+ *   HOMEBREW_TAP_REPO - Git URL of the tap repository (required with --push)
  */
 
 import { execSync } from 'node:child_process';
@@ -68,26 +68,26 @@ function generateFormula(version: string, shas: PlatformSha): string {
 
 class Orbix < Formula
   desc "App for agentic coding - access coding agent anywhere"
-  homepage "https://github.com/tiann/hapi"
+  homepage "https://github.com/zoefone/orbix"
   version "${version}"
-  license "MIT"
+  license "AGPL-3.0-only"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/orbix-darwin-arm64.tar.gz"
+      url "https://github.com/zoefone/orbix/releases/download/v#{version}/orbix-darwin-arm64.tar.gz"
       sha256 "${shas.darwinArm64}"
     else
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/orbix-darwin-x64.tar.gz"
+      url "https://github.com/zoefone/orbix/releases/download/v#{version}/orbix-darwin-x64.tar.gz"
       sha256 "${shas.darwinX64}"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/orbix-linux-arm64.tar.gz"
+      url "https://github.com/zoefone/orbix/releases/download/v#{version}/orbix-linux-arm64.tar.gz"
       sha256 "${shas.linuxArm64}"
     else
-      url "https://github.com/tiann/hapi/releases/download/v#{version}/orbix-linux-x64-baseline.tar.gz"
+      url "https://github.com/zoefone/orbix/releases/download/v#{version}/orbix-linux-x64-baseline.tar.gz"
       sha256 "${shas.linuxX64}"
     end
   end
@@ -138,7 +138,7 @@ async function main(): Promise<void> {
 
     const version = args[versionIdx + 1];
     const shouldPush = args.includes('--push');
-    const tapRepo = process.env.HOMEBREW_TAP_REPO || 'https://github.com/tiann/homebrew-tap.git';
+    const tapRepo = process.env.HOMEBREW_TAP_REPO;
     const checksumsPath = join(projectRoot, 'release-artifacts', 'checksums.txt');
 
     if (!existsSync(checksumsPath)) {
@@ -172,6 +172,10 @@ async function main(): Promise<void> {
         console.log('To push to the tap repository, run with --push flag.');
         console.log(`Or manually copy to your homebrew-tap repo's Formula/ directory.`);
         return;
+    }
+
+    if (!tapRepo) {
+        throw new Error('HOMEBREW_TAP_REPO is required with --push')
     }
 
     // Clone and push to tap repository
@@ -217,8 +221,7 @@ async function main(): Promise<void> {
             console.log('\nNo changes to commit (formula already up to date)');
         }
 
-        console.log('\nUsers can now install via:');
-        console.log('  brew install tiann/tap/orbix');
+        console.log('\nThe formula was pushed to the configured tap repository.');
     } finally {
         // Cleanup
         rmSync(tempDir, { recursive: true, force: true });

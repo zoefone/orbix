@@ -31,9 +31,9 @@ bun run --cwd cli dev          # launch Claude Code through Orbix
 
 Use `orbix codex`, `orbix cursor`, or the New Session page to select another provider.
 
-The terminal will display a URL and QR code. Scan the QR code with your phone or open the URL to access.
+Open the Hub URL from your browser. For phone installation and Web Push, publish it through a trusted HTTPS endpoint such as a named Cloudflare Tunnel, Tailscale Serve, your VPN, or an HTTPS reverse proxy.
 
-> The relay uses WireGuard + TLS for end-to-end encryption. Your data is encrypted from your device to your machine.
+`orbix hub --relay` is also available when you operate a compatible custom WireGuard/TLS relay; it is not required for normal self-hosting.
 
 For self-hosted options (Cloudflare Tunnel, Tailscale), see [Installation](docs/guide/installation.md)
 

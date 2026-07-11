@@ -14,7 +14,7 @@ export default defineConfig({
 
     nav: [
       { text: 'Quick Start', link: '/guide/quick-start' },
-      { text: 'App', link: 'https://app.orbix.run', target: '_blank' }
+      { text: 'Source', link: 'https://github.com/zoefone/orbix', target: '_blank' }
     ],
 
     sidebar: [
@@ -29,7 +29,7 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/tiann/hapi' }
+      { icon: 'github', link: 'https://github.com/zoefone/orbix' }
     ],
 
     footer: {

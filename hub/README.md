@@ -37,7 +37,7 @@ See `src/configuration.ts` for all options.
 - `ORBIX_HOME` - Data directory (default: ~/.orbix).
 - `DB_PATH` - SQLite database path (default: ORBIX_HOME/orbix.db).
 - `TELEGRAM_NOTIFICATION` - Enable/disable Telegram notifications (default: true).
-- `ORBIX_RELAY_API` - Relay API domain (default: relay.orbix.run).
+- `ORBIX_RELAY_API` - Optional custom `tunwg` relay API domain.
 - `ORBIX_RELAY_AUTH` - Relay auth key (default: orbix).
 - `ORBIX_RELAY_FORCE_TCP` - Force TCP relay mode (true/1).
 - `VAPID_SUBJECT` - Contact email/URL for Web Push.

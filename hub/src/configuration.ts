@@ -15,10 +15,10 @@
  * - ORBIX_LISTEN_PORT: Port for HTTP service (default: 3006)
  * - ORBIX_PUBLIC_URL: Public URL for external access (e.g., Telegram Mini App)
  * - CORS_ORIGINS: Comma-separated CORS origins
- * - ORBIX_RELAY_API: Relay API domain for tunwg (default: relay.orbix.run)
+ * - ORBIX_RELAY_API: Optional custom relay API domain for tunwg
  * - ORBIX_RELAY_AUTH: Relay auth key for tunwg (default: orbix)
  * - ORBIX_RELAY_FORCE_TCP: Force TCP relay mode when UDP is unavailable (true/1)
- * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to mailto:admin@orbix.run)
+ * - VAPID_SUBJECT: Contact email or URL for Web Push (defaults to the Orbix repository URL)
  * - ORBIX_HOME: Data directory (default: ~/.orbix)
  * - DB_PATH: SQLite database path (default: {ORBIX_HOME}/orbix.db)
  */

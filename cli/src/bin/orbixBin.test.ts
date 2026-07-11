@@ -92,9 +92,9 @@ describe('orbix binary launcher error reporting', () => {
         });
 
         expect(lines).toContain('Missing platform package: @orbix/cli-linux-x64');
-        expect(lines).toContain('Try reinstalling with the official npm registry:');
-        expect(lines).toContain('  npm install -g @orbix/cli --registry=https://registry.npmjs.org');
-        expect(lines).toContain('Or download the binary manually from:');
-        expect(lines).toContain('  https://github.com/tiann/hapi/releases');
+        expect(lines).toContain('Install the reconstructed Orbix CLI from source:');
+        expect(lines).toContain('  git clone --branch rebuild/orbix-next https://github.com/zoefone/orbix.git');
+        expect(lines).toContain('Or download a matching binary when one is published at:');
+        expect(lines).toContain('  https://github.com/zoefone/orbix/releases');
     });
 });

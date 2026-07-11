@@ -60,7 +60,7 @@ export function App() {
 function AppInner() {
     const { t } = useTranslation()
     const { serverUrl, baseUrl, setServerUrl, clearServerUrl } = useServerUrl()
-    const { authSource, isLoading: isAuthSourceLoading, setAccessToken } = useAuthSource(baseUrl)
+    const { authSource, isLoading: isAuthSourceLoading, setAccessToken, clearAuth } = useAuthSource(baseUrl)
     const { token, api, isLoading: isAuthLoading, error: authError, needsBinding, bind } = useAuth(authSource, baseUrl)
     const goBack = useAppGoBack()
     const pathname = useLocation({ select: (location) => location.pathname })
@@ -144,7 +144,7 @@ function AppInner() {
     const isFirstConnectRef = useRef(true)
     const baseUrlRef = useRef(baseUrl)
     const pushPromptedRef = useRef(false)
-    const { isSupported: isPushSupported, permission: pushPermission, requestPermission, subscribe } = usePushNotifications(api)
+    const { isSupported: isPushSupported, permission: pushPermission, subscribe } = usePushNotifications(api)
 
     useEffect(() => {
         if (baseUrlRef.current === baseUrl) {
@@ -186,20 +186,15 @@ function AppInner() {
         pushPromptedRef.current = true
 
         const run = async () => {
-            if (pushPermission === 'granted') {
-                await subscribe()
-                return
-            }
-            if (pushPermission === 'default') {
-                const granted = await requestPermission()
-                if (granted) {
-                    await subscribe()
-                }
-            }
+            // Restore an already-authorized subscription without interrupting the
+            // user. The first permission prompt is intentionally initiated from
+            // Settings so browsers receive a real user gesture and users get an
+            // explanation before granting OS-level notifications.
+            if (pushPermission === 'granted') await subscribe()
         }
 
         void run()
-    }, [api, isPushSupported, pushPermission, requestPermission, subscribe, token])
+    }, [api, isPushSupported, pushPermission, subscribe, token])
 
     const handleSseConnect = useCallback(() => {
         // Clear disconnected state on successful connection
@@ -433,7 +428,7 @@ function AppInner() {
     }
 
     return (
-        <AppContextProvider value={{ api, token, baseUrl }}>
+        <AppContextProvider value={{ api, token, baseUrl, clearAuth }}>
             <VoiceProvider>
                 <PwaUpdateBannerWithStatusOffset
                     isSyncing={isSyncing}

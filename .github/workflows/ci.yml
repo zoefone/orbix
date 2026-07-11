@@ -29,10 +29,18 @@ jobs:
         run: cd cli && bun run tools:unpack && bunx vitest run --maxWorkers=2
       - name: Web tests
         run: cd web && bunx vitest run --maxWorkers=2
+      - name: Website typecheck
+        run: cd website && bun run check
+      - name: Public distribution link audit
+        run: bun run scripts/check-public-distribution.ts
       - name: Build production PWA
         env:
           NODE_OPTIONS: --max-old-space-size=4096
         run: bun run build:web
+      - name: Build website and documentation
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: bun run build:site
       - name: Upload production PWA
         uses: actions/upload-artifact@v4
         with:

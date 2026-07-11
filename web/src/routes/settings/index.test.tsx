@@ -104,7 +104,7 @@ vi.mock('@/lib/languages', () => ({
 }))
 
 // Use vi.hoisted so these mocks are available when vi.mock factories run
-const { mockFetchVoices, mockFetchVoiceBackend, mockApi } = vi.hoisted(() => {
+const { mockFetchVoices, mockFetchVoiceBackend, mockApi, mockClearAuth, mockPushNotifications } = vi.hoisted(() => {
     const mockFetchVoices = vi.fn(() => Promise.resolve<unknown[]>([]))
     const mockFetchVoiceBackend = vi.fn(() => Promise.resolve({
         backend: 'elevenlabs' as 'elevenlabs' | 'gemini-live' | 'qwen-realtime',
@@ -113,8 +113,24 @@ const { mockFetchVoices, mockFetchVoiceBackend, mockApi } = vi.hoisted(() => {
     const mockApi = {
         fetchVoices: vi.fn(() => Promise.resolve({ voices: [] })),
     }
-    return { mockFetchVoices, mockFetchVoiceBackend, mockApi }
+    const mockClearAuth = vi.fn()
+    const mockPushNotifications = {
+        availability: 'insecure-context' as 'available' | 'insecure-context' | 'unsupported',
+        isSupported: false,
+        permission: 'default' as NotificationPermission,
+        isSubscribed: false,
+        error: null as string | null,
+        requestPermission: vi.fn(() => Promise.resolve(true)),
+        subscribe: vi.fn(() => Promise.resolve(true)),
+        unsubscribe: vi.fn(() => Promise.resolve(true)),
+        refreshSubscription: vi.fn(() => Promise.resolve()),
+    }
+    return { mockFetchVoices, mockFetchVoiceBackend, mockApi, mockClearAuth, mockPushNotifications }
 })
+
+vi.mock('@/hooks/usePushNotifications', () => ({
+    usePushNotifications: () => mockPushNotifications,
+}))
 
 // Mock static voices list
 vi.mock('@/lib/voices', () => ({
@@ -134,7 +150,7 @@ vi.mock('@/api/voice', () => ({
 
 // Mock useAppContext so the page doesn't throw "AppContext is not available"
 vi.mock('@/lib/app-context', () => ({
-    useAppContext: () => ({ api: mockApi, token: 'test', baseUrl: '' }),
+    useAppContext: () => ({ api: mockApi, token: 'test', baseUrl: 'https://hub.example.test', clearAuth: mockClearAuth }),
     AppContextProvider: ({ children }: { children: React.ReactNode }) => children,
 }))
 
@@ -165,6 +181,14 @@ describe('SettingsPage', () => {
     beforeEach(() => {
         vi.clearAllMocks()
         mockFetchVoiceBackend.mockResolvedValue({ backend: 'elevenlabs', backends: ['elevenlabs'] })
+        mockPushNotifications.availability = 'insecure-context'
+        mockPushNotifications.isSupported = false
+        mockPushNotifications.permission = 'default'
+        mockPushNotifications.isSubscribed = false
+        mockPushNotifications.error = null
+        mockPushNotifications.requestPermission.mockReset().mockResolvedValue(true)
+        mockPushNotifications.subscribe.mockReset().mockResolvedValue(true)
+        mockPushNotifications.unsubscribe.mockReset().mockResolvedValue(true)
         // Reset fetchVoices mock to return empty list by default
         mockFetchVoices.mockResolvedValue([])
         // Mock localStorage
@@ -199,10 +223,10 @@ describe('SettingsPage', () => {
     it('displays the website link with correct URL and security attributes', () => {
         renderWithProviders(<SettingsPage />)
         expect(screen.getAllByText('Website').length).toBeGreaterThanOrEqual(1)
-        const links = screen.getAllByRole('link', { name: 'orbix.run' })
+        const links = screen.getAllByRole('link', { name: 'GitHub' })
         expect(links.length).toBeGreaterThanOrEqual(1)
         const link = links[0]
-        expect(link).toHaveAttribute('href', 'https://orbix.run')
+        expect(link).toHaveAttribute('href', 'https://github.com/zoefone/orbix')
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
     })
@@ -220,6 +244,33 @@ describe('SettingsPage', () => {
         renderWithProviders(<SettingsPage />)
         expect(screen.getAllByText('Appearance').length).toBeGreaterThanOrEqual(1)
         expect(screen.getAllByText('Follow System').length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('shows the active Hub and can return to connection setup', () => {
+        renderWithProviders(<SettingsPage />)
+        expect(screen.getByText('https://hub.example.test')).toBeInTheDocument()
+        fireEvent.click(screen.getByRole('button', { name: 'Change' }))
+        expect(mockClearAuth).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders notification controls with environment guidance', () => {
+        renderWithProviders(<SettingsPage />)
+        expect(screen.getByText('Notifications')).toBeInTheDocument()
+        expect(screen.getByText('Task notifications')).toBeInTheDocument()
+    })
+
+    it('requests notification permission only after the user enables it', async () => {
+        mockPushNotifications.availability = 'available'
+        mockPushNotifications.isSupported = true
+        renderWithProviders(<SettingsPage />)
+
+        expect(mockPushNotifications.requestPermission).not.toHaveBeenCalled()
+        fireEvent.click(screen.getByRole('button', { name: 'Enable' }))
+
+        await waitFor(() => {
+            expect(mockPushNotifications.requestPermission).toHaveBeenCalledTimes(1)
+            expect(mockPushNotifications.subscribe).toHaveBeenCalledTimes(1)
+        })
     })
 
     it('uses correct i18n keys for Appearance setting', () => {

@@ -5,11 +5,11 @@
   "author": "Orbix contributors",
   "license": "AGPL-3.0-only",
   "type": "module",
-  "homepage": "https://github.com/tiann/hapi",
-  "bugs": "https://github.com/tiann/hapi/issues",
+  "homepage": "https://github.com/zoefone/orbix",
+  "bugs": "https://github.com/zoefone/orbix/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tiann/hapi.git",
+    "url": "git+https://github.com/zoefone/orbix.git",
     "directory": "cli"
   },
   "bin": {

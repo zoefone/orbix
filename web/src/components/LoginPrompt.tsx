@@ -185,7 +185,7 @@ export function LoginPrompt(props: LoginPromptProps) {
 
                         {!isBindMode && (
                             <div className="mt-5 flex items-center justify-between text-xs text-[var(--app-hint)]">
-                                <a href="https://orbix.run/docs" target="_blank" rel="noopener noreferrer" className="rounded-lg py-2 hover:text-[var(--app-fg)]">{t('login.help')}</a>
+                                <a href="https://github.com/zoefone/orbix/blob/rebuild/orbix-next/docs/guide/quick-start.md" target="_blank" rel="noopener noreferrer" className="rounded-lg py-2 hover:text-[var(--app-fg)]">{t('login.help')}</a>
                                 <Dialog open={isServerDialogOpen} onOpenChange={handleServerDialogOpenChange}>
                                     <DialogTrigger asChild>
                                         <button type="button" className="rounded-lg py-2 hover:text-[var(--app-fg)]">Hub · {props.serverUrl ? t('login.server.custom') : t('login.server.default')}</button>

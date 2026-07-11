@@ -68,56 +68,22 @@ ORBIX has three components:
 
 **Local only**: `orbix hub` → `orbix` → work in terminal
 
-**Remote access**: `orbix hub --relay` → `orbix runner start` → control from phone/web
+**Remote access**: expose `orbix hub` through your own HTTPS URL (named Cloudflare Tunnel, Tailscale Serve, reverse proxy, or VPN) → `orbix runner start` → control from phone/web.
 
 ## Install the CLI
 
 ```bash
-npm install -g @orbix/cli --registry=https://registry.npmjs.org
-```
-
-> Recommendation: use the official npm registry for global install. Some mirrors may not sync platform packages in time.
-
-Or with Homebrew:
-
-```bash
-brew install tiann/tap/orbix
-```
-
-## Other install options
-
-<details>
-<summary>npx (no install)</summary>
-
-```bash
-npx @orbix/cli
-```
-</details>
-
-<details>
-<summary>Prebuilt binary</summary>
-
-Download the latest release from [GitHub Releases](https://github.com/tiann/hapi/releases).
-
-```bash
-xattr -d com.apple.quarantine ./orbix
-chmod +x ./orbix
-sudo mv ./orbix /usr/local/bin/
-```
-</details>
-
-<details>
-<summary>Build from source</summary>
-
-```bash
-git clone https://github.com/tiann/hapi.git
+git clone --branch rebuild/orbix-next https://github.com/zoefone/orbix.git
 cd orbix
 bun install
-bun build:single-exe
+bun run build:single-exe
 
-./cli/dist/orbix
+# Output: cli/dist-exe/<bun-target>/orbix
+sudo install -m 755 cli/dist-exe/*/orbix /usr/local/bin/orbix
+orbix --help
 ```
-</details>
+
+The reconstructed CLI is currently distributed from this repository. Do not install `@orbix/cli` from npm or an unrelated Homebrew tap; no official package has been published there for this rebuild yet.
 
 ## Hub setup
 
@@ -126,21 +92,29 @@ The hub can be deployed on:
 - **Local desktop** (default) - Run on your development machine
 - **Remote host** - Deploy the hub on a VPS, cloud host, or any machine with network access
 
-### Default: Public Relay (recommended)
+### Recommended: Your own HTTPS endpoint
+
+Run the Hub locally, then publish it through a trusted HTTPS endpoint. HTTPS is required for installable PWA features and Web Push notifications on phones.
 
 ```bash
-orbix hub --relay
+ORBIX_LISTEN_HOST=127.0.0.1 orbix hub
 ```
 
-The terminal displays a URL and QR code. Scan to access from anywhere.
+Use a named Cloudflare Tunnel, Tailscale Serve, a VPN, or an HTTPS reverse proxy as described under [Self-hosted tunnels](#self-hosted-tunnels). Set `ORBIX_PUBLIC_URL` to that HTTPS URL so links and notifications point to the correct address.
 
 `orbix server` remains supported as an alias.
 
-- **End-to-end encrypted** with WireGuard + TLS
-- No configuration needed
-- Works behind NAT, firewalls, and any network
+### Optional custom WireGuard relay
 
-> **Tip:** The relay uses UDP by default. If you experience connectivity issues, set `ORBIX_RELAY_FORCE_TCP=true` to force TCP mode.
+`orbix hub --relay` is available for operators who run a compatible `tunwg` relay. Configure the relay endpoint and credentials explicitly:
+
+```bash
+ORBIX_RELAY_API=relay.your-domain.example \
+ORBIX_RELAY_AUTH=your-relay-auth \
+orbix hub --relay
+```
+
+Set `ORBIX_RELAY_FORCE_TCP=true` when UDP is unavailable. Orbix does not require or silently depend on a vendor-hosted relay.
 
 ### Local Only
 
@@ -184,8 +158,10 @@ On first run, ORBIX:
 | `CORS_ORIGINS` | - | `corsOrigins` | Allowed CORS origins (comma-separated) |
 | `TELEGRAM_BOT_TOKEN` | - | `telegramBotToken` | Telegram Bot API token |
 | `TELEGRAM_NOTIFICATION` | `true` | `telegramNotification` | Enable Telegram notifications |
-| `ORBIX_RELAY_FORCE_TCP` | `false` | - | Force TCP mode for relay |
-| `VAPID_SUBJECT` | `mailto:admin@orbix.run` | - | Web Push contact info |
+| `ORBIX_RELAY_API` | - | - | Custom `tunwg` relay API domain used with `--relay` |
+| `ORBIX_RELAY_AUTH` | - | - | Authentication key for the custom relay |
+| `ORBIX_RELAY_FORCE_TCP` | `false` | - | Force TCP mode for custom relay |
+| `VAPID_SUBJECT` | Repository URL | - | Web Push contact URL or `mailto:` address |
 | `ORBIX_HOME` | `~/.orbix` | - | Config directory path |
 | `DB_PATH` | `~/.orbix/orbix.db` | - | Database file path |
 | `ELEVENLABS_API_KEY` | - | - | ElevenLabs API key for voice |
@@ -201,14 +177,13 @@ When ENV values are set and not present in settings.json, they are automatically
 
 ```json
 {
-  "$schema": "https://orbix.run/docs/schemas/settings.schema.json",
   "listenHost": "0.0.0.0",
   "listenPort": 3006,
   "publicUrl": "https://your-domain.com"
 }
 ```
 
-JSON Schema: [settings.schema.json](https://orbix.run/schemas/settings.schema.json)
+Schema source: [`docs/public/schemas/settings.schema.json`](../public/schemas/settings.schema.json)
 </details>
 
 ## CLI setup

@@ -37,6 +37,7 @@ import {
 } from '@/hooks/useChatSurfaceColors'
 import { useAppearance, getAppearanceOptions, type AppearancePreference } from '@/hooks/useTheme'
 import { useThemeColors, type ThemeColorKeyId } from '@/hooks/useThemeColors'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { PROTOCOL_VERSION } from '@orbix/protocol'
 import { VoiceRespondsControls, VoiceSoundsControls, VoicePersonaControls, VoiceDiagnosticsControls } from '@/components/settings/VoiceAdvancedControls'
 
@@ -371,7 +372,7 @@ function ThemeColorControl(props: { t: (key: string) => string }) {
 
 export default function SettingsPage() {
     const { t, locale, setLocale } = useTranslation()
-    const { api } = useAppContext()
+    const { api, baseUrl, clearAuth } = useAppContext()
     const goBack = useAppGoBack()
     const [isOpen, setIsOpen] = useState(false)
     const [isAppearanceOpen, setIsAppearanceOpen] = useState(false)
@@ -383,6 +384,8 @@ export default function SettingsPage() {
     const [isVoiceOpen, setIsVoiceOpen] = useState(false)
     const [isVoiceBackendOpen, setIsVoiceBackendOpen] = useState(false)
     const [isVoicePickerOpen, setIsVoicePickerOpen] = useState(false)
+    const [isNotificationBusy, setIsNotificationBusy] = useState(false)
+    const [notificationFeedback, setNotificationFeedback] = useState<string | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const appearanceContainerRef = useRef<HTMLDivElement>(null)
     const fontContainerRef = useRef<HTMLDivElement>(null)
@@ -407,6 +410,31 @@ export default function SettingsPage() {
         setUserMessageBackground,
     } = useChatSurfaceColors()
     const { appearance, setAppearance } = useAppearance()
+    const pushNotifications = usePushNotifications(api)
+
+    const handleNotificationToggle = async () => {
+        if (pushNotifications.availability !== 'available' || pushNotifications.permission === 'denied') return
+        setIsNotificationBusy(true)
+        setNotificationFeedback(null)
+        try {
+            if (pushNotifications.isSubscribed) {
+                const disabled = await pushNotifications.unsubscribe()
+                setNotificationFeedback(disabled ? 'disabled' : 'error')
+                return
+            }
+
+            let granted = pushNotifications.permission === 'granted'
+            if (!granted) granted = await pushNotifications.requestPermission()
+            if (!granted) {
+                setNotificationFeedback('not-granted')
+                return
+            }
+            const enabled = await pushNotifications.subscribe()
+            setNotificationFeedback(enabled ? 'enabled' : 'error')
+        } finally {
+            setIsNotificationBusy(false)
+        }
+    }
 
     // Voice language state - read from localStorage
     const [voiceLanguage, setVoiceLanguage] = useState<string | null>(() => {
@@ -740,6 +768,87 @@ export default function SettingsPage() {
                                 </div>
                             )}
                         </div>
+                    </div>
+
+                    {/* Connection section */}
+                    <div className="border-b border-[var(--app-divider)]">
+                        <div className="px-3 py-2 text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wide">
+                            {t('settings.connection.title')}
+                        </div>
+                        <div className="flex items-start justify-between gap-4 px-3 py-3">
+                            <div className="min-w-0">
+                                <div className="text-[var(--app-fg)]">{t('settings.connection.hub')}</div>
+                                <div className="mt-0.5 truncate text-xs text-[var(--app-hint)]" title={baseUrl}>{baseUrl}</div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={clearAuth}
+                                className="min-h-11 shrink-0 rounded-xl border border-[var(--app-border)] px-3 text-sm font-medium text-[var(--app-fg)] transition-colors hover:bg-[var(--app-subtle-bg)]"
+                            >
+                                {t('settings.connection.change')}
+                            </button>
+                        </div>
+                        <p className="px-3 pb-3 text-xs leading-relaxed text-[var(--app-hint)]">
+                            {t('settings.connection.description')}
+                        </p>
+                    </div>
+
+                    {/* Notifications section */}
+                    <div className="border-b border-[var(--app-divider)]">
+                        <div className="px-3 py-2 text-xs font-semibold text-[var(--app-hint)] uppercase tracking-wide">
+                            {t('settings.notifications.title')}
+                        </div>
+                        <div className="flex items-center justify-between gap-4 px-3 py-3">
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 text-[var(--app-fg)]">
+                                    <span
+                                        className={`h-2 w-2 shrink-0 rounded-full ${pushNotifications.isSubscribed ? 'bg-emerald-500' : 'bg-[var(--app-hint)]'}`}
+                                        aria-hidden="true"
+                                    />
+                                    <span>{t('settings.notifications.device')}</span>
+                                </div>
+                                <p className="mt-1 text-xs leading-relaxed text-[var(--app-hint)]">
+                                    {pushNotifications.availability === 'insecure-context'
+                                        ? t('settings.notifications.insecure')
+                                        : pushNotifications.availability === 'unsupported'
+                                            ? t('settings.notifications.unsupported')
+                                            : pushNotifications.permission === 'denied'
+                                                ? t('settings.notifications.blocked')
+                                                : pushNotifications.isSubscribed
+                                                    ? t('settings.notifications.enabledDescription')
+                                                    : t('settings.notifications.description')}
+                                </p>
+                            </div>
+                            {pushNotifications.availability === 'available' && pushNotifications.permission !== 'denied' ? (
+                                <button
+                                    type="button"
+                                    disabled={isNotificationBusy}
+                                    onClick={() => void handleNotificationToggle()}
+                                    className={`min-h-11 min-w-20 shrink-0 rounded-xl px-3 text-sm font-semibold transition-colors disabled:cursor-wait disabled:opacity-60 ${
+                                        pushNotifications.isSubscribed
+                                            ? 'border border-[var(--app-border)] text-[var(--app-fg)] hover:bg-[var(--app-subtle-bg)]'
+                                            : 'bg-[var(--app-fg)] text-[var(--app-bg)] hover:opacity-90'
+                                    }`}
+                                >
+                                    {isNotificationBusy
+                                        ? t('settings.notifications.working')
+                                        : pushNotifications.isSubscribed
+                                            ? t('settings.notifications.disable')
+                                            : t('settings.notifications.enable')}
+                                </button>
+                            ) : null}
+                        </div>
+                        {(notificationFeedback || pushNotifications.error) ? (
+                            <p role="status" className="px-3 pb-3 text-xs text-[var(--app-hint)]">
+                                {notificationFeedback === 'enabled'
+                                    ? t('settings.notifications.enabledFeedback')
+                                    : notificationFeedback === 'disabled'
+                                        ? t('settings.notifications.disabledFeedback')
+                                        : notificationFeedback === 'not-granted'
+                                            ? t('settings.notifications.notGranted')
+                                            : t('settings.notifications.error')}
+                            </p>
+                        ) : null}
                     </div>
 
                     {/* Display section */}
@@ -1265,12 +1374,12 @@ export default function SettingsPage() {
                         <div className="flex w-full items-center justify-between px-3 py-3">
                             <span className="text-[var(--app-fg)]">{t('settings.about.website')}</span>
                             <a
-                                href="https://orbix.run"
+                                href="https://github.com/zoefone/orbix"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-[var(--app-link)] hover:underline"
                             >
-                                orbix.run
+                                GitHub
                             </a>
                         </div>
                         <div className="flex w-full items-center justify-between px-3 py-3">

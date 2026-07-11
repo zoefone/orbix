@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { ApiClient } from '@/api/client'
 
-function isPushSupported(): boolean {
-    return typeof window !== 'undefined'
-        && 'serviceWorker' in navigator
-        && 'PushManager' in window
-        && 'Notification' in window
+export type PushAvailability = 'available' | 'insecure-context' | 'unsupported'
+
+export function getPushAvailability(): PushAvailability {
+    if (typeof window === 'undefined') return 'unsupported'
+    if (!window.isSecureContext) return 'insecure-context'
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        return 'unsupported'
+    }
+    return 'available'
 }
 
 function base64UrlToUint8Array(base64Url: string): Uint8Array {
@@ -22,18 +26,19 @@ function base64UrlToUint8Array(base64Url: string): Uint8Array {
 }
 
 export function usePushNotifications(api: ApiClient | null) {
-    const [isSupported, setIsSupported] = useState(false)
+    const [availability, setAvailability] = useState<PushAvailability>(() => getPushAvailability())
     const [permission, setPermission] = useState<NotificationPermission>('default')
     const [isSubscribed, setIsSubscribed] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     const refreshSubscription = useCallback(async () => {
-        if (!isPushSupported()) {
-            setIsSupported(false)
+        const nextAvailability = getPushAvailability()
+        setAvailability(nextAvailability)
+        if (nextAvailability !== 'available') {
             setIsSubscribed(false)
             return
         }
 
-        setIsSupported(true)
         setPermission(Notification.permission)
 
         if (Notification.permission !== 'granted') {
@@ -41,9 +46,16 @@ export function usePushNotifications(api: ApiClient | null) {
             return
         }
 
-        const registration = await navigator.serviceWorker.ready
-        const subscription = await registration.pushManager.getSubscription()
-        setIsSubscribed(Boolean(subscription))
+        try {
+            const registration = await navigator.serviceWorker.ready
+            const subscription = await registration.pushManager.getSubscription()
+            setIsSubscribed(Boolean(subscription))
+            setError(null)
+        } catch (cause) {
+            console.error('[PushNotifications] Failed to inspect subscription:', cause)
+            setIsSubscribed(false)
+            setError('subscription-check-failed')
+        }
     }, [])
 
     useEffect(() => {
@@ -51,20 +63,28 @@ export function usePushNotifications(api: ApiClient | null) {
     }, [refreshSubscription])
 
     const requestPermission = useCallback(async (): Promise<boolean> => {
-        if (!isPushSupported()) {
+        if (getPushAvailability() !== 'available') {
             return false
         }
 
-        const result = await Notification.requestPermission()
-        setPermission(result)
-        if (result !== 'granted') {
+        try {
+            const result = await Notification.requestPermission()
+            setPermission(result)
+            setError(null)
+            if (result !== 'granted') {
+                setIsSubscribed(false)
+            }
+            return result === 'granted'
+        } catch (cause) {
+            console.error('[PushNotifications] Permission request failed:', cause)
             setIsSubscribed(false)
+            setError('permission-request-failed')
+            return false
         }
-        return result === 'granted'
     }, [])
 
     const subscribe = useCallback(async (): Promise<boolean> => {
-        if (!api || !isPushSupported()) {
+        if (!api || getPushAvailability() !== 'available') {
             return false
         }
 
@@ -97,15 +117,17 @@ export function usePushNotifications(api: ApiClient | null) {
                 }
             })
             setIsSubscribed(true)
+            setError(null)
             return true
         } catch (error) {
             console.error('[PushNotifications] Failed to subscribe:', error)
+            setError('subscribe-failed')
             return false
         }
     }, [api])
 
     const unsubscribe = useCallback(async (): Promise<boolean> => {
-        if (!api || !isPushSupported()) {
+        if (!api || getPushAvailability() !== 'available') {
             return false
         }
 
@@ -121,19 +143,24 @@ export function usePushNotifications(api: ApiClient | null) {
             const success = await subscription.unsubscribe()
             await api.unsubscribePushNotifications({ endpoint })
             setIsSubscribed(false)
+            setError(null)
             return success
         } catch (error) {
             console.error('[PushNotifications] Failed to unsubscribe:', error)
+            setError('unsubscribe-failed')
             return false
         }
     }, [api])
 
     return {
-        isSupported,
+        availability,
+        isSupported: availability === 'available',
         permission,
         isSubscribed,
+        error,
         requestPermission,
         subscribe,
-        unsubscribe
+        unsubscribe,
+        refreshSubscription
     }
 }

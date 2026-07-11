@@ -15,6 +15,7 @@ import { VisibilityTracker } from './visibility/visibilityTracker'
 import { TunnelManager } from './tunnel'
 import { waitForTunnelTlsReady } from './tunnel/tlsGate'
 import { ServerChanChannel } from './serverchan/channel'
+import { buildDirectAccessUrl } from './tunnel/directAccessUrl'
 import QRCode from 'qrcode'
 import type { Server as BunServer } from 'bun'
 import type { WebSocketData } from '@socket.io/bun-engine'
@@ -108,9 +109,9 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
     let tunnelManager: TunnelManager | null = null
 
     // Load configuration (async - loads from env/file with persistence)
-    const relayApiDomain = process.env.ORBIX_RELAY_API || 'relay.orbix.run'
+    const relayApiDomain = process.env.ORBIX_RELAY_API || ''
     const relayFlag = resolveRelayFlag(options.args ?? process.argv)
-    const officialWebUrl = process.env.ORBIX_OFFICIAL_WEB_URL || 'https://app.orbix.run'
+    const officialWebUrl = process.env.ORBIX_OFFICIAL_WEB_URL || ''
     const config = await createConfiguration()
     const baseCorsOrigins = normalizeOrigins(config.corsOrigins)
     const relayCorsOrigin = normalizeOrigin(officialWebUrl)
@@ -159,7 +160,7 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
 
     // Display tunnel status
     if (relayFlag.enabled) {
-        console.log(`[Hub] Tunnel: enabled (${relayFlag.source}), API: ${relayApiDomain}`)
+        console.log(`[Hub] Tunnel: enabled (${relayFlag.source}), API: ${relayApiDomain || 'tunwg default'}`)
     } else {
         console.log(`[Hub] Tunnel: disabled (${relayFlag.source})`)
     }
@@ -167,7 +168,7 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
     const store = new Store(config.dbPath)
     const jwtSecret = await getOrCreateJwtSecret()
     const vapidKeys = await getOrCreateVapidKeys(config.dataDir)
-    const vapidSubject = process.env.VAPID_SUBJECT ?? 'mailto:admin@orbix.run'
+    const vapidSubject = process.env.VAPID_SUBJECT ?? 'https://github.com/zoefone/orbix'
     const pushService = new PushService(vapidKeys, vapidSubject, store)
 
     visibilityTracker = new VisibilityTracker()
@@ -230,7 +231,10 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
         vapidPublicKey: vapidKeys.publicKey,
         socketEngine: socketServer.engine,
         corsOrigins,
-        relayMode: relayFlag.enabled,
+        // A self-hosted relay should be immediately usable from its tunnel URL.
+        // Only suppress bundled assets when the operator explicitly configured
+        // a separately hosted frontend.
+        relayMode: relayFlag.enabled && Boolean(officialWebUrl),
         officialWebUrl
     })
 
@@ -274,11 +278,7 @@ export async function startHub(options: StartHubOptions = {}): Promise<HubInstan
             console.log('[Web] Public: ' + tunnelUrl)
 
             // Generate direct access link with hub and token
-            const params = new URLSearchParams({
-                hub: tunnelUrl,
-                token: config.cliApiToken
-            })
-            const directAccessUrl = `${officialWebUrl}/?${params.toString()}`
+            const directAccessUrl = buildDirectAccessUrl(officialWebUrl, tunnelUrl, config.cliApiToken)
 
             console.log('')
             console.log('Open in browser:')

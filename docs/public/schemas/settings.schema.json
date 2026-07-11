@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://orbix.run/schemas/settings.schema.json",
+  "$id": "https://raw.githubusercontent.com/zoefone/orbix/rebuild/orbix-next/docs/public/schemas/settings.schema.json",
   "title": "ORBIX Settings",
   "description": "Configuration file for ORBIX (~/.orbix/settings.json)",
   "type": "object",

@@ -1,5 +1,9 @@
 # AGENTS.md
 
+## Mandatory host resource policy
+
+This repository runs on a 2C/2G host. Before doing any nontrivial work, follow `/root/AGENTS.md`. All tests/typechecks/dev servers/browsers must use `/root/bin/safe-run`; run one worker and one expensive command at a time. Full production builds run only in GitHub Actions. Never start Vite and Playwright as separate resource scopes.
+
 Work style: telegraph; noun-phrases ok; drop grammar;
 
 Short guide for AI agents in this repo. Prefer progressive loading: start with the root README, then package READMEs as needed.
@@ -63,10 +67,8 @@ Bun workspaces; `shared` consumed by cli, hub, web.
 ## Common commands (repo root)
 
 ```bash
-bun typecheck           # All packages
-bun run test            # cli + hub tests
-bun run dev             # hub + web concurrently
-bun run build:single-exe # All-in-one binary
+/root/bin/safe-run test bash -lc 'cd <package> && NODE_OPTIONS=--max-old-space-size=420 <targeted command>'
+# Full suite and every production build: push and use GitHub Actions
 ```
 
 ## Key source dirs
@@ -113,7 +115,7 @@ bun run build:single-exe # All-in-one binary
 
 Before commit/push/PR: use the **`pre-push-review`** skill (`~/.cursor/skills/pre-push-review/`).
 
-1. **Mechanical:** `bun typecheck && bun run test` (matches `.github/workflows/test.yml`)
+1. **Mechanical:** targeted local checks through `/root/bin/safe-run test`; full typecheck/test/build through GitHub Actions
 2. **Logic:** skim `git diff origin/main...HEAD`; apply `.github/prompts/codex-pr-review.md` as a local Major checklist (no Codex required)
 3. **Style:** optional
 

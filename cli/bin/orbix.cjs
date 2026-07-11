@@ -5,8 +5,7 @@ const path = require('path');
 
 const platform = process.platform;
 const arch = process.arch;
-const RELEASE_URL = 'https://github.com/tiann/hapi/releases';
-const OFFICIAL_NPM_REGISTRY = 'https://registry.npmjs.org';
+const RELEASE_URL = 'https://github.com/zoefone/orbix/releases';
 const SUPPORTED_PLATFORMS = [
     {
         key: 'darwin-arm64',
@@ -100,12 +99,12 @@ function reportMissingPlatformPackage(platformName = platform, archName = arch, 
     log(`Missing platform package: ${platformPackage}`);
     log('');
     log(`Detected platform ${platformName}-${archName} is supported, but the platform binary package was not installed.`);
-    log('This may happen when using a registry mirror that has not synced all optionalDependencies.');
+    log('The platform binary is not present in this installation.');
     log('');
-    log('Try reinstalling with the official npm registry:');
-    log(`  npm install -g @orbix/cli --registry=${OFFICIAL_NPM_REGISTRY}`);
+    log('Install the reconstructed Orbix CLI from source:');
+    log('  git clone --branch rebuild/orbix-next https://github.com/zoefone/orbix.git');
     log('');
-    log('Or download the binary manually from:');
+    log('Or download a matching binary when one is published at:');
     log(`  ${RELEASE_URL}`);
 }
 

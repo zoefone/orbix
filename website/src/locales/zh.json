@@ -109,13 +109,13 @@
     }
   },
   "installation": {
-    "title": "几秒钟内开始",
-    "e2ee": "🔒 WireGuard + TLS 端对端加密",
+    "title": "开始使用",
+    "e2ee": "远程访问和手机通知请使用你自己的可信 HTTPS 地址。",
     "npm": {
-      "step1": "1. 启动服务器",
-      "step2": "2. 启动编码会话",
-      "step3": "3. 打开 URL",
-      "step3Hint": "终端中显示 URL 和二维码"
+      "step1": "1. 克隆重构版本",
+      "step2": "2. 安装并启动 Hub",
+      "step3": "3. 连接手机",
+      "step3Hint": "打开 Hub 地址，输入访问令牌，然后安装 PWA"
     }
   },
   "cta": {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const GITHUB_REPO = "tiann/hapi";
+const GITHUB_REPO = "zoefone/orbix";
 const CACHE_KEY = "orbix-latest-version";
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
 

@@ -4,39 +4,29 @@
 
 ## Install ORBIX
 
-::: code-group
-
-```bash [npm]
-npm install -g @orbix/cli --registry=https://registry.npmjs.org
+```bash
+git clone --branch rebuild/orbix-next https://github.com/zoefone/orbix.git
+cd orbix
+bun install
+bun run build:single-exe
+sudo install -m 755 cli/dist-exe/*/orbix /usr/local/bin/orbix
 ```
 
-```bash [Homebrew]
-brew install tiann/tap/orbix
-```
-
-```bash [npx (one-off)]
-npx @orbix/cli
-```
-
-:::
-
-> Recommendation: use the official npm registry for global install. Some mirrors may not sync platform packages in time.
+The reconstructed CLI is currently installed from source; no official npm or Homebrew package has been published for this rebuild.
 
 Other install options: [Installation](./installation.md)
 
 ## Start the hub
 
 ```bash
-orbix hub --relay
+orbix hub
 ```
 
 On first run, ORBIX prints an access token and saves it to `~/.orbix/settings.json`.
 
 `orbix server` remains supported as an alias.
 
-The terminal will display a URL and QR code for remote access.
-
-> End-to-end encrypted with WireGuard + TLS.
+For access outside the machine, expose the Hub through your own trusted HTTPS URL. HTTPS is required for phone installation and Web Push. See [Hub setup](./installation.md#hub-setup).
 
 ## Start a coding session
 
@@ -48,7 +38,7 @@ This starts Claude Code wrapped with ORBIX. The session appears in the web UI.
 
 ## Open the UI
 
-Open the URL shown in the terminal, or scan the QR code with your phone.
+Open the Hub URL in a browser or installed PWA.
 
 Enter your access token to log in.
 
