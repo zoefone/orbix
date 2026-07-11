@@ -8,7 +8,7 @@ A Progressive Web App (PWA) is a web application that can be installed on your d
 
 - **Home screen icon** - Launch ORBIX like any other app
 - **Full screen mode** - No browser chrome, immersive experience
-- **Offline support** - Basic functionality works without internet
+- **Resilient app shell** - The installed interface can launch while connectivity recovers
 - **Auto-updates** - Always get the latest version
 
 ## Installing ORBIX PWA
@@ -46,13 +46,7 @@ iOS requires Safari for PWA installation. Chrome/Firefox on iOS don't support th
 
 ### Offline Mode
 
-When offline, ORBIX can:
-
-- Display cached session lists
-- Show previously loaded messages
-- Queue actions for when you're back online
-
-An offline indicator appears when you lose connection.
+When offline, Orbix keeps the installed app shell available and shows an offline indicator. Session, machine and message APIs are intentionally **not** stored in Service Worker Cache Storage because they contain authenticated workspace data. Reconnect before reading or controlling tasks.
 
 ### Auto-Update
 
@@ -65,14 +59,6 @@ ORBIX checks for updates in the background and lets you choose when to reload:
 
 ORBIX uses a user-controlled reload instead of forcing an automatic refresh, so you choose when to reload. The banner cannot be dismissed without upgrading, so you won't forget you're on an old build.
 
-### Background Sync
-
-Actions taken offline are synced when reconnected:
-
-- Pending messages are sent
-- Permission decisions are relayed
-- Session state is refreshed
-
 ## Caching Strategy
 
 ORBIX uses intelligent caching:
@@ -80,8 +66,7 @@ ORBIX uses intelligent caching:
 | Content | Strategy | Duration |
 |---------|----------|----------|
 | App shell | Cache first | Until update |
-| Sessions API | Network first | 5 minutes |
-| Machines API | Network first | 10 minutes |
+| Authenticated APIs | Network only | Never persisted by Service Worker |
 | Static assets | Cache first | Forever |
 
 ## Notifications
@@ -90,9 +75,12 @@ ORBIX supports push notifications to alert you when agents need attention.
 
 ### Enable Notifications
 
-1. Open ORBIX - a permission popup appears automatically
-2. Tap **Allow** to enable notifications
-3. If you missed the popup, go to system settings to grant permission
+1. Open Orbix through a trusted **HTTPS** URL
+2. Open **Settings → Notifications**
+3. Tap **Enable**, then approve the browser/system permission prompt
+4. Tap **Send test** and confirm the notification appears after locking the phone or putting Orbix in the background
+
+On iOS/iPadOS 16.4 or later, install Orbix to the Home Screen first, open the installed app, and then enable notifications from Settings.
 
 ### Notification Types
 
@@ -100,6 +88,9 @@ ORBIX supports push notifications to alert you when agents need attention.
 |------|-----------|
 | Permission Request | Agent needs your approval |
 | Ready | Agent finished and awaits input |
+| Working | A CLI session is actively running |
+| Completed / Failed | A task ended or encountered an error |
+| Question | The agent needs a structured choice from you |
 
 ::: tip
 If push notifications don't work in your region (e.g., FCM unavailable), use [Telegram integration](./installation.md#telegram-setup) instead.

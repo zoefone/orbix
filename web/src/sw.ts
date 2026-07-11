@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
-import { CacheFirst, NetworkFirst } from 'workbox-strategies'
+import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import {
     cleanupExpiredShareTransfers,
@@ -11,6 +11,7 @@ import {
 import { shareTargetPathname } from './lib/sharePath'
 
 const sharePath = shareTargetPathname()
+const legacyPrivateCacheNames = ['api-sessions', 'api-session-detail', 'api-machines']
 
 declare const self: ServiceWorkerGlobalScope & {
     __WB_MANIFEST: Array<string | { url: string; revision?: string }>
@@ -33,47 +34,11 @@ type PushPayload = {
 
 precacheAndRoute(self.__WB_MANIFEST)
 
-registerRoute(
-    ({ url }) => url.pathname === '/api/sessions',
-    new NetworkFirst({
-        cacheName: 'api-sessions',
-        networkTimeoutSeconds: 10,
-        plugins: [
-            new ExpirationPlugin({
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 5
-            })
-        ]
-    })
-)
-
-registerRoute(
-    ({ url }) => /^\/api\/sessions\/[^/]+$/.test(url.pathname),
-    new NetworkFirst({
-        cacheName: 'api-session-detail',
-        networkTimeoutSeconds: 10,
-        plugins: [
-            new ExpirationPlugin({
-                maxEntries: 20,
-                maxAgeSeconds: 60 * 5
-            })
-        ]
-    })
-)
-
-registerRoute(
-    ({ url }) => url.pathname === '/api/machines',
-    new NetworkFirst({
-        cacheName: 'api-machines',
-        networkTimeoutSeconds: 10,
-        plugins: [
-            new ExpirationPlugin({
-                maxEntries: 5,
-                maxAgeSeconds: 60 * 10
-            })
-        ]
-    })
-)
+// Never cache authenticated API responses. Workbox cache keys do not vary by
+// Authorization header by default, so caching sessions or machines could expose
+// one Hub namespace/account's data after the user switches accounts on the same
+// device. The app shell remains available offline; private task data stays
+// network-only and is cleared from memory when auth changes.
 
 registerRoute(
     /^https:\/\/cdn\.socket\.io\/.*/,
@@ -108,7 +73,10 @@ self.addEventListener('message', (event) => {
 })
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim())
+    event.waitUntil(Promise.all([
+        self.clients.claim(),
+        ...legacyPrivateCacheNames.map((cacheName) => caches.delete(cacheName))
+    ]).then(() => undefined))
 })
 
 self.addEventListener('push', (event) => {
