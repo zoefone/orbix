@@ -216,8 +216,12 @@ function createWebApp(options: {
 
     app.use('*', logger())
 
-    // Health check endpoint (no auth required)
-    app.get('/health', (c) => c.json({ status: 'ok', protocolVersion: PROTOCOL_VERSION }))
+    // Health check endpoints (no auth required). Keep the root route for
+    // backwards compatibility and expose the conventional API-prefixed alias
+    // so load balancers do not accidentally probe an authenticated endpoint.
+    const healthResponse = () => ({ status: 'ok' as const, protocolVersion: PROTOCOL_VERSION })
+    app.get('/health', (c) => c.json(healthResponse()))
+    app.get('/api/health', (c) => c.json(healthResponse()))
 
     const configuration = getConfiguration()
     const corsOrigins = options.corsOrigins ?? configuration.corsOrigins

@@ -16,6 +16,11 @@ server {
         default_type text/plain;
     }
 
+    # Never pass dotfiles (for example .git or .env) to the SPA fallback.
+    location ~ /\.(?!well-known(?:/|$)) {
+        return 404;
+    }
+
     location / {
         return 301 https://$host$request_uri;
     }
@@ -35,6 +40,11 @@ server {
     add_header Strict-Transport-Security "max-age=31536000" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Never pass dotfiles (for example .git or .env) to the SPA fallback.
+    location ~ /\.(?!well-known(?:/|$)) {
+        return 404;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:3406;
