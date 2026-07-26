@@ -1,0 +1,72 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+.group { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin: 10px 0 18px; }
+.srow { display: flex; align-items: center; gap: 12px; padding: 15px 16px; font-size: 15.5px; }
+.srow + .srow { border-top: 1px solid var(--line2); }
+.srow .lbl { flex: 1; }
+.srow .val { color: var(--ink2); font-size: 14.5px; display: flex; align-items: center; gap: 6px; }
+.s-ic { width: 30px; height: 30px; border-radius: 9px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink2); flex: none; }
+.seg { display: flex; background: var(--card2); border-radius: 12px; padding: 3px; gap: 3px; width: 210px; }
+.seg div { flex: 1; text-align: center; padding: 7px 0; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--ink2); }
+.seg div.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+.tog { width: 46px; height: 28px; border-radius: 999px; background: var(--ok); position: relative; flex: none; }
+.tog::after { content: ""; position: absolute; right: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; }
+.tog.off { background: var(--ink3); } .tog.off::after { right: auto; left: 3px; }
+.cli-ver { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+</style></head><body>
+<div class="stage"><div class="stage-label">Settings — Light</div><div class="phone theme-light">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">Settings</div><div style="width:40px"></div></div>
+  <div class="scroll">
+    <div class="section-label" style="padding-top:8px">Appearance</div>
+    <div class="group"><div class="srow"><div class="s-ic">◐</div><div class="lbl">Theme</div><div class="seg"><div>Light</div><div>Dark</div><div class="on">Auto</div></div></div></div>
+    <div class="section-label">Notifications</div>
+    <div class="group">
+      <div class="srow"><div class="s-ic">🔔</div><div class="lbl">Task updates</div><div class="tog"></div></div>
+      <div class="srow"><div class="s-ic">⚠</div><div class="lbl">Approval requests</div><div class="tog"></div></div>
+      <div class="srow"><div class="s-ic">🔊</div><div class="lbl">Sound</div><div class="tog off"></div></div>
+    </div>
+    <div class="section-label">Connected CLIs</div>
+    <div class="group">
+      <div class="srow"><div class="s-ic" style="font-weight:700">C</div><div class="lbl">Codex<div class="cli-ver">codex-cli 0.144.6</div></div><span class="dot ok"></span></div>
+      <div class="srow"><div class="s-ic">✻</div><div class="lbl">Claude Code<div class="cli-ver">2.1.215</div></div><span class="dot ok"></span></div>
+      <div class="srow"><div class="s-ic">◈</div><div class="lbl">Cursor Agent<div class="cli-ver">2026.07.16</div></div><span class="dot ok"></span></div>
+    </div>
+    <div class="section-label">Server</div>
+    <div class="group">
+      <div class="srow"><div class="s-ic">⌂</div><div class="lbl">this-machine<div class="cli-ver mono">192.168.1.5:8760</div></div><div class="val"><span class="dot ok"></span>Connected</div></div>
+      <div class="srow"><div class="s-ic">☁</div><div class="lbl">Tunnel / Relay</div><div class="val">Off ›</div></div>
+      <div class="srow"><div class="s-ic">⎋</div><div class="lbl" style="color:var(--err)">Disconnect</div></div>
+    </div>
+    <div class="section-label">About</div>
+    <div class="group"><div class="srow"><div class="s-ic">◍</div><div class="lbl">Orbix</div><div class="val">v0.1.0</div></div></div>
+  </div>
+</div></div>
+<div class="stage"><div class="stage-label">Settings — Dark</div><div class="phone theme-dark">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">Settings</div><div style="width:40px"></div></div>
+  <div class="scroll">
+    <div class="section-label" style="padding-top:8px">Appearance</div>
+    <div class="group"><div class="srow"><div class="s-ic">◐</div><div class="lbl">Theme</div><div class="seg"><div>Light</div><div class="on">Dark</div><div>Auto</div></div></div></div>
+    <div class="section-label">Notifications</div>
+    <div class="group">
+      <div class="srow"><div class="s-ic">🔔</div><div class="lbl">Task updates</div><div class="tog"></div></div>
+      <div class="srow"><div class="s-ic">⚠</div><div class="lbl">Approval requests</div><div class="tog"></div></div>
+      <div class="srow"><div class="s-ic">🔊</div><div class="lbl">Sound</div><div class="tog off"></div></div>
+    </div>
+    <div class="section-label">Connected CLIs</div>
+    <div class="group">
+      <div class="srow"><div class="s-ic" style="font-weight:700">C</div><div class="lbl">Codex<div class="cli-ver">codex-cli 0.144.6</div></div><span class="dot ok"></span></div>
+      <div class="srow"><div class="s-ic">✻</div><div class="lbl">Claude Code<div class="cli-ver">2.1.215</div></div><span class="dot ok"></span></div>
+      <div class="srow"><div class="s-ic">◈</div><div class="lbl">Cursor Agent<div class="cli-ver">2026.07.16</div></div><span class="dot ok"></span></div>
+    </div>
+    <div class="section-label">Server</div>
+    <div class="group">
+      <div class="srow"><div class="s-ic">⌂</div><div class="lbl">this-machine<div class="cli-ver mono">192.168.1.5:8760</div></div><div class="val"><span class="dot ok"></span>Connected</div></div>
+      <div class="srow"><div class="s-ic">☁</div><div class="lbl">Tunnel / Relay</div><div class="val">Off ›</div></div>
+      <div class="srow"><div class="s-ic">⎋</div><div class="lbl" style="color:var(--err)">Disconnect</div></div>
+    </div>
+    <div class="section-label">About</div>
+    <div class="group"><div class="srow"><div class="s-ic">◍</div><div class="lbl">Orbix</div><div class="val">v0.1.0</div></div></div>
+  </div>
+</div></div>
+</body></html>

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Orbix launcher — wraps the server CLI with the bundled Node.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -x "$HERE/.tools/node/bin/node" ]; then
+  NODE="$HERE/.tools/node/bin/node"
+else
+  NODE="$(command -v node)"
+fi
+export PATH="$HOME/.local/bin:$PATH"
+exec "$NODE" "$HERE/packages/server/dist/index.js" "$@"

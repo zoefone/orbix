@@ -1,0 +1,69 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body { padding: 40px; }
+.web { width: 1180px; height: 760px; border-radius: 18px; overflow: hidden; display: flex; box-shadow: var(--shadow), 0 0 0 1px rgba(0,0,0,.15); background: var(--bg); color: var(--ink); }
+.sidebar { width: 292px; flex: none; border-right: 1px solid var(--line); display: flex; flex-direction: column; background: var(--bg); }
+.sb-head { padding: 18px 16px 10px; display: flex; align-items: center; gap: 10px; }
+.sb-logo { width: 28px; height: 28px; border-radius: 9px; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.sb-search { margin: 6px 14px 10px; background: var(--card2); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; color: var(--ink3); display: flex; gap: 8px; align-items: center; }
+.sb-item { display: flex; gap: 10px; padding: 9px 16px; align-items: flex-start; border-left: 2px solid transparent; }
+.sb-item.on { background: var(--card2); border-left-color: var(--ink); }
+.sb-item .t { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-item .s { font-size: 11.5px; color: var(--ink2); margin-top: 2px; }
+.sb-foot { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink2); }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.chat-head { padding: 14px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+.chat-scroll { flex: 1; padding: 20px 24px; overflow: hidden; position: relative; }
+.chat-scroll::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(transparent, var(--bg)); }
+.msg-col { max-width: 720px; margin: 0 auto; }
+.msg-user { background: var(--bubble); border-radius: 20px; padding: 12px 16px; font-size: 15px; line-height: 1.45; margin: 10px 0 10px 48px; }
+.tool { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 8px 0; overflow: hidden; }
+.tool-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 13.5px; font-weight: 500; }
+.tool-head .ticon { width: 24px; height: 24px; border-radius: 7px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink2); }
+.tool-head .tstate { margin-left: auto; font-size: 12px; color: var(--ink2); }
+.approval { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 13px 15px; margin: 12px 0; }
+.a-cmd { background: var(--code-bg); border-radius: 10px; padding: 8px 12px; font-family: var(--mono); font-size: 12px; margin-top: 9px; }
+.a-btns { display: flex; gap: 8px; margin-top: 11px; }
+.a-btn { padding: 8px 18px; border-radius: 999px; font-size: 13.5px; font-weight: 600; }
+.a-btn.primary { background: var(--ink); color: var(--bg); } .a-btn.ghost { border: 1px solid var(--line); background: var(--pill); color: var(--ink); }
+.turn-meta { font-size: 13px; color: var(--ink2); margin: 16px 0 6px; }
+.wcomp-wrap { padding: 12px 24px 20px; }
+.wcomp { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 6px 6px 6px 8px; }
+.dot.work { background: var(--accent); } .dot.ok { background: var(--ok); } .dot.idle { background: var(--ink3); }
+.diff-add { color: var(--ok); font-weight: 600; } .diff-del { color: var(--err); font-weight: 600; }
+.am { width: 18px; height: 18px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex: none; }
+.am-codex { background: var(--ink); color: var(--bg); } .am-claude { background: var(--card2); color: var(--ink); border: 1px solid var(--line);} .am-cursor { background: var(--accent-soft); color: var(--accent); }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 12px; font-weight: 500; color: var(--ink2); }
+.chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+</style></head><body>
+<div class="stage"><div class="stage-label">Web — Dark</div><div class="web theme-dark">
+  <div class="sidebar">
+    <div class="sb-head"><div class="sb-logo">◍</div><b style="font-size:15px">Orbix</b><span style="margin-left:auto" class="dot ok"></span></div>
+    <div class="sb-search">⌕ Search sessions</div>
+    <div style="display:flex;gap:6px;padding:0 14px 12px"><div class="chip on">All</div><div class="chip">Codex</div><div class="chip">Claude</div><div class="chip">Cursor</div></div>
+    <div class="sb-item"><span class="am am-cursor">◈</span><div style="min-width:0"><div class="t">Fix input overflow handling</div><div class="s">orbix-app · <span style="color:var(--accent)">Working…</span></div></div></div>
+    <div class="sb-item on"><span class="am am-codex">C</span><div style="min-width:0"><div class="t">Update icon size</div><div class="s">orbix-server · ✓ Passed · <span class="diff-add">+8</span> <span class="diff-del">-23</span></div></div></div>
+    <div class="sb-item"><span class="am am-claude">✻</span><div style="min-width:0"><div class="t">Animation regression investigation</div><div class="s">orbix-web · No Changes</div></div></div>
+    <div class="sb-item"><span class="am am-codex">C</span><div style="min-width:0"><div class="t">Add transcription demo</div><div class="s">orbix-server · ✓ Passed · <span class="diff-add">+800</span> <span class="diff-del">-150</span></div></div></div>
+    <div class="sb-foot"><span style="width:26px;height:26px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center">⚙</span>Settings<span style="margin-left:auto">＋</span></div>
+  </div>
+  <div class="main">
+    <div class="chat-head"><span class="am am-codex" style="width:22px;height:22px;font-size:11px">C</span><b style="font-size:15px">Update icon size</b><span style="font-size:12.5px;color:var(--ink2)">· orbix-server</span><span style="margin-left:auto;display:flex;gap:8px"><span class="chip">gpt-5.6-sol</span><span class="chip">Default</span><span class="chip">···</span></span></div>
+    <div class="chat-scroll"><div class="msg-col">
+      <div class="msg-user">The menu icon button jitters position whenever the menu is toggled. Make sure the positioning is stable.</div>
+      <div class="turn-meta">Working… · 2m</div>
+      <div class="tool"><div class="tool-head"><div class="ticon">⌘</div>Run <span class="mono" style="color:var(--ink2)">npm test</span><span class="tstate">✓ 3.2s</span></div></div>
+      <div class="tool"><div class="tool-head"><div class="ticon">✎</div>Edit <span class="mono" style="color:var(--ink2)">Sidebar.tsx</span><span class="tstate" style="color:var(--ok)">+12 -8</span></div></div>
+      <div class="approval"><div style="font-size:14px;font-weight:600">⚠ Approval needed</div><div class="a-cmd">$ git push origin fix/sidebar-jitter</div><div class="a-btns"><div class="a-btn primary">Approve</div><div class="a-btn ghost">Always allow</div><div class="a-btn ghost">Deny</div></div></div>
+    </div></div>
+    <div class="wcomp-wrap"><div class="wcomp"><div style="width:34px;height:34px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--ink2)">＋</div><span style="flex:1;font-size:15px;color:var(--ink3)">Follow up…</span><div style="width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center">↑</div></div></div>
+  </div>
+</div></div>
+<div class="stage" style="justify-content:center"><div class="stage-label">Web — Light (same layout)</div><div class="web theme-light" style="height:300px">
+  <div class="sidebar"><div class="sb-head"><div class="sb-logo">◍</div><b style="font-size:15px">Orbix</b><span style="margin-left:auto" class="dot ok"></span></div><div class="sb-search">⌕ Search sessions</div>
+    <div class="sb-item on"><span class="am am-codex">C</span><div style="min-width:0"><div class="t">Update icon size</div><div class="s">orbix-server · ✓ Passed</div></div></div>
+    <div class="sb-item"><span class="am am-claude">✻</span><div style="min-width:0"><div class="t">Animation regression investigation</div><div class="s">orbix-web · No Changes</div></div></div>
+  </div>
+  <div class="main"><div class="chat-head"><span class="am am-codex" style="width:22px;height:22px;font-size:11px">C</span><b style="font-size:15px">Update icon size</b><span style="margin-left:auto;display:flex;gap:8px"><span class="chip">gpt-5.6-sol</span><span class="chip">···</span></span></div>
+  <div class="chat-scroll"><div class="msg-col"><div class="msg-user">The menu icon button jitters position whenever the menu is toggled.</div></div></div></div>
+</div></div>
+</body></html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+.msg-user { background: var(--bubble); border-radius: 20px; padding: 12px 16px; font-size: 16px; line-height: 1.45; margin: 10px 0 10px 32px; color: var(--ink); }
+.turn-meta { font-size: 13.5px; color: var(--ink2); margin: 18px 0 6px; }
+.tool { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 8px 0; overflow: hidden; }
+.tool-head { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 14px; font-weight: 500; }
+.tool-head .ticon { width: 26px; height: 26px; border-radius: 8px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--ink2); flex: none; }
+.tool-head .tstate { margin-left: auto; font-size: 12.5px; color: var(--ink2); font-weight: 500; }
+.tool-body { border-top: 1px solid var(--line2); background: var(--code-bg); padding: 10px 14px; font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--ink2); white-space: pre-wrap; }
+.diff-line-add { color: var(--ok); } .diff-line-del { color: var(--err); }
+.approval { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; margin: 12px 0; }
+.approval .a-title { font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.approval .a-cmd { background: var(--code-bg); border-radius: 10px; padding: 9px 12px; font-family: var(--mono); font-size: 12.5px; margin-top: 10px; color: var(--ink); }
+.a-btns { display: flex; gap: 8px; margin-top: 12px; }
+.a-btn { flex: 1; text-align: center; padding: 10px 0; border-radius: 999px; font-size: 14px; font-weight: 600; }
+.a-btn.primary { background: var(--ink); color: var(--bg); }
+.a-btn.ghost { border: 1px solid var(--line); color: var(--ink); background: var(--pill); }
+.pills { display: flex; gap: 8px; margin: 14px 0 4px; flex-wrap: wrap; }
+.pill-btn { padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--pill); font-size: 14px; font-weight: 600; color: var(--ink); }
+.cursor-blink { display: inline-block; width: 8px; height: 16px; background: var(--accent); border-radius: 2px; vertical-align: -2px; animation: pulse 1s infinite; }
+.media-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); margin: 8px 0; position: relative; }
+.media-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+.media-cap { padding: 10px 14px; font-size: 13px; color: var(--ink2); background: var(--card); }
+</style></head><body>
+<div class="stage"><div class="stage-label">Chat — Light</div><div class="phone theme-light">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">Update icon size</div><div class="icon-btn plain">···</div></div>
+  <div class="scroll fade-mask">
+    <div class="msg-user">The menu icon button jitters position whenever the menu is toggled. Make sure the positioning is stable.</div>
+    <div class="turn-meta">Working… · 2m</div>
+    <div class="tool"><div class="tool-head"><div class="ticon">⌘</div>Run <span class="mono" style="color:var(--ink2)">npm test</span><span class="tstate">✓ 3.2s</span></div></div>
+    <div class="tool"><div class="tool-head"><div class="ticon">✎</div>Edit <span class="mono" style="color:var(--ink2)">Sidebar.tsx</span><span class="tstate" style="color:var(--ok)">+12 -8</span></div>
+      <div class="tool-body"><span class="diff-line-del">- left: isOpen ? 12 : 10;</span>
+<span class="diff-line-add">+ left: 12;</span>
+<span class="diff-line-add">+ position: fixed;</span></div></div>
+    <div class="approval">
+      <div class="a-title">⚠ Approval needed</div>
+      <div class="a-cmd">$ git push origin fix/sidebar-jitter</div>
+      <div class="a-btns"><div class="a-btn primary">Approve</div><div class="a-btn ghost">Always</div><div class="a-btn ghost">Deny</div></div>
+    </div>
+    <div style="font-size:15.5px;line-height:1.5;margin:6px 0">I'll pin the button to a fixed offset so it no longer shifts <span class="cursor-blink"></span></div>
+  </div>
+  <div class="composer-wrap"><div class="composer"><div class="plus">＋</div><span class="ph">Follow up…</span><div class="send">↑</div></div></div>
+</div></div>
+<div class="stage"><div class="stage-label">Chat finished — Dark</div><div class="phone theme-dark">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">Fix sidebar jitter</div><div class="icon-btn plain">···</div></div>
+  <div class="scroll fade-mask">
+    <div class="msg-user">The menu icon button jitters position whenever the menu is toggled. Make sure the positioning is stable.</div>
+    <div class="turn-meta">Finished · 5m</div>
+    <div class="media-card"><div style="width:100%;height:150px;background:linear-gradient(135deg,#3b5b8c,#7ea4d6);display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;color:#333;font-size:16px">▶</div></div><div class="media-cap">Walkthrough · 0:12</div></div>
+    <div style="font-size:15.5px;line-height:1.55;margin:8px 0;color:var(--ink)">Manually verified in Chrome at <span style="color:var(--accent)">http://localhost:4000/agents</span> that sidebar toggle now stays at a stable position (12px, 12px) from the viewport in both open and closed states.</div>
+    <div class="pills"><div class="pill-btn">Review <span class="diff-add">+2</span> <span class="diff-del">-2</span></div><div class="pill-btn">Squash &amp; Merge</div></div>
+  </div>
+  <div class="composer-wrap"><div class="composer"><div class="plus">＋</div><span class="ph">Follow up…</span><div class="mic">🎙</div></div></div>
+</div></div>
+</body></html>

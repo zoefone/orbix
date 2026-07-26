@@ -1,0 +1,23 @@
+# deps
+node_modules/
+
+# build outputs
+packages/*/dist/
+dist/
+
+# bundled toolchain (local machine only)
+.tools/
+
+# android build outputs
+packages/app/android/app/build/
+packages/app/android/build/
+packages/app/android/.gradle/
+packages/app/android/app/.cxx/
+packages/app/.expo/
+
+# misc
+*.log
+.DS_Store
+
+# local agent config
+.claude/

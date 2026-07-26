@@ -1,0 +1,54 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+.hero { text-align: center; padding: 34px 0 20px; }
+.logo { width: 72px; height: 72px; border-radius: 22px; background: var(--ink); margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; color: var(--bg); font-size: 30px; font-weight: 700; }
+.hero h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+.hero p { color: var(--ink2); font-size: 14.5px; margin-top: 6px; }
+.tabs { display: flex; background: var(--card2); border-radius: 14px; padding: 4px; gap: 4px; margin: 18px 0 14px; }
+.tabs div { flex: 1; text-align: center; padding: 9px 0; border-radius: 11px; font-size: 14px; font-weight: 500; color: var(--ink2); }
+.tabs div.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.field { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 10px 0; }
+.field .f-l { font-size: 12px; color: var(--ink2); font-weight: 600; letter-spacing: .04em; margin-bottom: 4px; }
+.field .f-v { font-size: 16px; color: var(--ink); }
+.field .f-v.ph { color: var(--ink3); }
+.cta { background: var(--ink); color: var(--bg); text-align: center; padding: 16px; border-radius: 999px; font-size: 16px; font-weight: 600; margin-top: 16px; }
+.qr { width: 190px; height: 190px; border-radius: 20px; background: var(--card); border: 1px solid var(--line); margin: 8px auto; display: grid; grid-template: repeat(9,1fr)/repeat(9,1fr); padding: 14px; gap: 2px; }
+.qr i { background: var(--ink); border-radius: 1.5px; } .qr i.w { background: transparent; }
+.saved { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin: 8px 0; }
+.saved .s-ic { width: 38px; height: 38px; border-radius: 11px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--ink2); }
+.saved .s-name { font-size: 15.5px; font-weight: 600; } .saved .s-sub { font-size: 12.5px; color: var(--ink2); margin-top: 2px; }
+</style></head><body>
+<div class="stage"><div class="stage-label">Connect — Light</div><div class="phone theme-light">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="scroll">
+    <div class="hero"><div class="logo">◍</div><h1>Orbix</h1><p>Control Codex · Claude · Cursor from anywhere</p></div>
+    <div class="tabs"><div class="on">Direct</div><div>Pairing</div><div>Relay</div></div>
+    <div class="field"><div class="f-l">SERVER ADDRESS</div><div class="f-v mono" style="font-size:15px">192.168.1.5:8760</div></div>
+    <div class="field"><div class="f-l">PASSWORD / KEY</div><div class="f-v ph">••••••••••</div></div>
+    <div class="cta">Connect</div>
+    <div class="section-label">Saved servers</div>
+    <div class="saved"><div class="s-ic">⌂</div><div><div class="s-name">dev-server</div><div class="s-sub mono">43.154.22.8:8760 · last 2h ago</div></div><span class="dot ok" style="margin-left:auto"></span></div>
+    <div class="saved"><div class="s-ic">☁</div><div><div class="s-name">home-pc via relay</div><div class="s-sub mono">relay.orbix.dev/s/x7f2 · last 3d ago</div></div><span class="dot idle" style="margin-left:auto"></span></div>
+  </div>
+</div></div>
+<div class="stage"><div class="stage-label">Connect · Pairing — Dark</div><div class="phone theme-dark">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="scroll">
+    <div class="hero"><div class="logo">◍</div><h1>Orbix</h1><p>Control Codex · Claude · Cursor from anywhere</p></div>
+    <div class="tabs"><div>Direct</div><div class="on">Pairing</div><div>Relay</div></div>
+    <div class="qr">
+      <i></i><i></i><i></i><i class="w"></i><i></i><i class="w"></i><i></i><i></i><i></i>
+      <i></i><i class="w"></i><i></i><i></i><i class="w"></i><i></i><i></i><i class="w"></i><i></i>
+      <i></i><i></i><i></i><i class="w"></i><i></i><i class="w"></i><i></i><i></i><i></i>
+      <i class="w"></i><i class="w"></i><i class="w"></i><i></i><i></i><i></i><i class="w"></i><i class="w"></i><i class="w"></i>
+      <i></i><i class="w"></i><i></i><i></i><i></i><i></i><i></i><i class="w"></i><i></i>
+      <i class="w"></i><i></i><i class="w"></i><i></i><i></i><i></i><i class="w"></i><i></i><i class="w"></i>
+      <i></i><i></i><i></i><i class="w"></i><i class="w"></i><i></i><i></i><i></i><i></i>
+      <i></i><i class="w"></i><i></i><i></i><i></i><i class="w"></i><i></i><i class="w"></i><i></i>
+      <i></i><i></i><i></i><i class="w"></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <p style="text-align:center;color:var(--ink2);font-size:13.5px;line-height:1.5">Run <span class="mono" style="color:var(--ink)">orbix pair</span> on your machine,<br>then scan or enter the 6-digit code</p>
+    <div class="field" style="margin-top:14px"><div class="f-l">PAIRING CODE</div><div class="f-v mono" style="letter-spacing:.3em;text-align:center">4 2 8 1 9 3</div></div>
+    <div class="cta">Pair</div>
+  </div>
+</div></div>
+</body></html>

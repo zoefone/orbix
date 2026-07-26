@@ -1,0 +1,50 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+.agent-card { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 16px; margin: 10px 0; }
+.agent-card.sel { border-color: var(--ink); }
+.agent-card .a-ic { width: 44px; height: 44px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; flex: none; }
+.agent-card .a-name { font-size: 16.5px; font-weight: 600; }
+.agent-card .a-desc { font-size: 13px; color: var(--ink2); margin-top: 2px; }
+.radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--ink3); margin-left: auto; flex: none; }
+.sel .radio { border-color: var(--ink); background: var(--ink); box-shadow: inset 0 0 0 4px var(--card); }
+.field { margin: 16px 0; }
+.field-label { font-size: 13.5px; color: var(--ink2); font-weight: 500; margin-bottom: 8px; }
+.field-box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 15.5px; display: flex; align-items: center; gap: 10px; }
+.field-box .val { flex: 1; color: var(--ink); }
+.field-box .muted { color: var(--ink3); }
+.seg { display: flex; background: var(--card2); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg div { flex: 1; text-align: center; padding: 8px 0; border-radius: 10px; font-size: 13.5px; font-weight: 500; color: var(--ink2); }
+.seg div.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.cta { background: var(--ink); color: var(--bg); text-align: center; padding: 16px; border-radius: 999px; font-size: 16px; font-weight: 600; margin: 18px 0 8px; }
+.am-codex { background: var(--ink); color: var(--bg); } .am-claude { background: var(--card2); color: var(--ink); border: 1px solid var(--line);} .am-cursor { background: var(--accent-soft); color: var(--accent); }
+</style></head><body>
+<div class="stage"><div class="stage-label">New Session — Light</div><div class="phone theme-light">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">New Session</div><div style="width:40px"></div></div>
+  <div class="scroll">
+    <div class="section-label" style="padding-top:6px">Agent</div>
+    <div class="agent-card sel"><div class="a-ic am-codex">C</div><div><div class="a-name">Codex</div><div class="a-desc">OpenAI · gpt-5.6-sol</div></div><div class="radio"></div></div>
+    <div class="agent-card"><div class="a-ic am-claude">✻</div><div><div class="a-name">Claude Code</div><div class="a-desc">Anthropic · sonnet 4.5</div></div><div class="radio"></div></div>
+    <div class="agent-card"><div class="a-ic am-cursor">◈</div><div><div class="a-name">Cursor Agent</div><div class="a-desc">composer 2.5</div></div><div class="radio"></div></div>
+    <div class="field"><div class="field-label">PROJECT DIRECTORY</div><div class="field-box"><span style="color:var(--ink2)">📁</span><span class="val mono" style="font-size:14px">/root/orbix</span><span class="muted">›</span></div></div>
+    <div class="field"><div class="field-label">MODEL</div><div class="field-box"><span class="val">gpt-5.6-sol</span><span class="muted">⌄</span></div></div>
+    <div class="field"><div class="field-label">PERMISSION MODE</div><div class="seg"><div>Plan</div><div class="on">Default</div><div>Auto-edit</div><div>YOLO</div></div></div>
+    <div class="field"><div class="field-label">INITIAL PROMPT · OPTIONAL</div><div class="field-box" style="align-items:flex-start;min-height:88px"><span class="muted">Describe the task…</span></div></div>
+    <div class="cta">Start Session</div>
+  </div>
+</div></div>
+<div class="stage"><div class="stage-label">New Session — Dark</div><div class="phone theme-dark">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">New Session</div><div style="width:40px"></div></div>
+  <div class="scroll">
+    <div class="section-label" style="padding-top:6px">Agent</div>
+    <div class="agent-card sel"><div class="a-ic am-codex">C</div><div><div class="a-name">Codex</div><div class="a-desc">OpenAI · gpt-5.6-sol</div></div><div class="radio"></div></div>
+    <div class="agent-card"><div class="a-ic am-claude">✻</div><div><div class="a-name">Claude Code</div><div class="a-desc">Anthropic · sonnet 4.5</div></div><div class="radio"></div></div>
+    <div class="agent-card"><div class="a-ic am-cursor">◈</div><div><div class="a-name">Cursor Agent</div><div class="a-desc">composer 2.5</div></div><div class="radio"></div></div>
+    <div class="field"><div class="field-label">PROJECT DIRECTORY</div><div class="field-box"><span style="color:var(--ink2)">📁</span><span class="val mono" style="font-size:14px">/root/orbix</span><span class="muted">›</span></div></div>
+    <div class="field"><div class="field-label">MODEL</div><div class="field-box"><span class="val">gpt-5.6-sol</span><span class="muted">⌄</span></div></div>
+    <div class="field"><div class="field-label">PERMISSION MODE</div><div class="seg"><div>Plan</div><div class="on">Default</div><div>Auto-edit</div><div>YOLO</div></div></div>
+    <div class="field"><div class="field-label">INITIAL PROMPT · OPTIONAL</div><div class="field-box" style="align-items:flex-start;min-height:88px"><span class="muted">Describe the task…</span></div></div>
+    <div class="cta">Start Session</div>
+  </div>
+</div></div>
+</body></html>

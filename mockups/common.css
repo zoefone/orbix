@@ -1,0 +1,47 @@
+/* Orbix design tokens — monochrome zinc palette, rounded, single blue accent */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+:root {
+  --font: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+}
+.theme-light {
+  --bg: #FAFAFA; --card: #FFFFFF; --card2: #F4F4F5; --ink: #18181B; --ink2: #71717A;
+  --ink3: #A1A1AA; --line: #E4E4E7; --line2: #F0F0F1; --accent: #2F6FED; --accent-soft: #EBF1FE;
+  --ok: #16A34A; --warn: #D97706; --err: #DC2626; --bubble: #F4F4F5; --shadow: 0 8px 30px rgba(0,0,0,.08);
+  --code-bg: #F4F4F5; --pill: #FFFFFF;
+}
+.theme-dark {
+  --bg: #09090B; --card: #131316; --card2: #1C1C1F; --ink: #FAFAFA; --ink2: #A1A1AA;
+  --ink3: #52525B; --line: #27272A; --line2: #1C1C1F; --accent: #5B8DEF; --accent-soft: #16233D;
+  --ok: #4ADE80; --warn: #FBBF24; --err: #F87171; --bubble: #1C1C1F; --shadow: 0 8px 30px rgba(0,0,0,.5);
+  --code-bg: #0E0E11; --pill: #1C1C1F;
+}
+body { font-family: var(--font); background: #C8C8CC; display: flex; gap: 48px; padding: 40px; justify-content: center; align-items: flex-start; min-height: 100vh; }
+.stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.stage-label { font: 600 13px var(--font); color: #555; letter-spacing: .12em; text-transform: uppercase; }
+.phone { width: 390px; height: 844px; border-radius: 48px; background: var(--bg); color: var(--ink); overflow: hidden; position: relative; box-shadow: var(--shadow), 0 0 0 10px #1a1a1c, 0 0 0 12px #3a3a3e; display: flex; flex-direction: column; }
+.statusbar { height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px 0 36px; font-size: 15px; font-weight: 600; flex: none; }
+.statusbar .right { display: flex; gap: 6px; align-items: center; }
+.navbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 20px 10px; flex: none; }
+.nav-title { font-size: 17px; font-weight: 600; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1px solid var(--line); color: var(--ink); flex: none; }
+.icon-btn.plain { background: transparent; border-color: transparent; color: var(--ink2); }
+.scroll { flex: 1; overflow: hidden; padding: 0 20px; }
+.h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; padding: 8px 0 4px; }
+.section-label { font-size: 14px; color: var(--ink2); padding: 20px 0 8px; font-weight: 500; }
+.divider { height: 1px; background: var(--line2); margin: 0 -20px; }
+.composer-wrap { flex: none; padding: 10px 16px 26px; background: linear-gradient(transparent, var(--bg) 30%); }
+.composer { display: flex; align-items: center; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 6px 6px 6px 8px; box-shadow: 0 2px 12px rgba(0,0,0,.04); }
+.composer .plus { width: 36px; height: 36px; border-radius: 50%; background: var(--card2); display: flex; align-items: center; justify-content: center; color: var(--ink2); flex: none; }
+.composer input, .composer .ph { flex: 1; font-size: 16px; color: var(--ink3); background: transparent; border: none; outline: none; }
+.composer .mic { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--ink2); flex: none; }
+.composer .send { width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; flex: none; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 13.5px; font-weight: 500; color: var(--ink2); flex: none; }
+.chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.dot.ok { background: var(--ok); } .dot.idle { background: var(--ink3); } .dot.work { background: var(--accent); } .dot.err { background: var(--err); } .dot.warn { background: var(--warn); }
+.pulse { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+.mono { font-family: var(--mono); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; letter-spacing: .02em; }

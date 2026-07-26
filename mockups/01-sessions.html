@@ -1,0 +1,62 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+.ws-row { display: flex; gap: 12px; padding: 14px 0; align-items: flex-start; }
+.ws-row .body { flex: 1; min-width: 0; }
+.ws-title { font-size: 16.5px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-sub { font-size: 13.5px; color: var(--ink2); margin-top: 3px; display: flex; align-items: center; gap: 5px; }
+.ws-sub .sep { color: var(--ink3); }
+.agent-mark { width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; flex: none; margin-top: 2px; }
+.am-codex { background: var(--ink); color: var(--bg); }
+.am-claude { background: var(--card2); color: var(--ink); border: 1px solid var(--line); }
+.am-cursor { background: var(--accent-soft); color: var(--accent); }
+.diff-add { color: var(--ok); font-weight: 600; } .diff-del { color: var(--err); font-weight: 600; }
+.check { color: var(--ok); font-weight: 700; }
+.status-working { color: var(--accent); }
+.filter-row { display: flex; gap: 8px; padding: 12px 0 4px; overflow: hidden; }
+.fade-mask { position: relative; }
+.fade-mask::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+</style></head><body>
+<div class="stage"><div class="stage-label">Sessions — Light</div><div class="phone theme-light">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div style="display:flex;gap:8px"><div class="icon-btn">⌕</div><div class="icon-btn">☰</div></div></div>
+  <div class="scroll fade-mask">
+    <div class="h1">All Workspaces</div>
+    <div class="filter-row">
+      <div class="chip on">All</div><div class="chip"><span class="agent-mark am-codex" style="width:16px;height:16px;font-size:9px;margin:0">C</span>Codex</div><div class="chip"><span class="agent-mark am-claude" style="width:16px;height:16px;font-size:9px;margin:0">✻</span>Claude</div><div class="chip"><span class="agent-mark am-cursor" style="width:16px;height:16px;font-size:9px;margin:0">◈</span>Cursor</div>
+    </div>
+    <div class="section-label">Pinned</div>
+    <div class="ws-row"><span class="agent-mark am-codex">C</span><div class="body"><div class="ws-title">Update icon size</div><div class="ws-sub">orbix-server<span class="sep">·</span><span class="check">✓ Passed</span><span class="sep">·</span><span class="diff-add">+8</span> <span class="diff-del">-23</span></div></div></div>
+    <div class="divider"></div>
+    <div class="ws-row"><span class="agent-mark am-claude">✻</span><div class="body"><div class="ws-title">Animation regression investigation</div><div class="ws-sub">orbix-web<span class="sep">·</span>No Changes</div></div></div>
+    <div class="section-label">Today</div>
+    <div class="ws-row"><span class="agent-mark am-cursor">◈</span><div class="body"><div class="ws-title">Fix input overflow handling</div><div class="ws-sub">orbix-app<span class="sep">·</span><span class="dot work pulse" style="display:inline-block;width:6px;height:6px"></span><span class="status-working">Working…</span></div></div></div>
+    <div class="divider"></div>
+    <div class="ws-row"><span class="agent-mark am-codex">C</span><div class="body"><div class="ws-title">Add transcription demo</div><div class="ws-sub">orbix-server<span class="sep">·</span><span class="check">✓ Passed</span><span class="sep">·</span><span class="diff-add">+800</span> <span class="diff-del">-150</span></div></div></div>
+    <div class="divider"></div>
+    <div class="ws-row"><span class="agent-mark am-claude">✻</span><div class="body"><div class="ws-title">Update working animation duration</div><div class="ws-sub">orbix-web<span class="sep">·</span><span class="check">✓ Passed</span><span class="sep">·</span><span class="diff-add">+1</span> <span class="diff-del">-1</span></div></div></div>
+    <div class="section-label">orbix-relay</div>
+    <div class="ws-row"><span class="agent-mark am-cursor">◈</span><div class="body"><div class="ws-title">Fix sidebar toggle jitter</div><div class="ws-sub">everywhere<span class="sep">·</span><span style="color:var(--ink2)">⑂ Merged</span></div></div></div>
+  </div>
+  <div class="composer-wrap"><div class="composer"><div class="plus">＋</div><span class="ph">Plan, ask, build…</span><div class="mic">🎙</div></div></div>
+</div></div>
+<div class="stage"><div class="stage-label">Sessions — Dark</div><div class="phone theme-dark">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div style="display:flex;gap:8px"><div class="icon-btn">⌕</div><div class="icon-btn">☰</div></div></div>
+  <div class="scroll fade-mask">
+    <div class="h1">All Workspaces</div>
+    <div class="filter-row">
+      <div class="chip on">All</div><div class="chip"><span class="agent-mark am-codex" style="width:16px;height:16px;font-size:9px;margin:0">C</span>Codex</div><div class="chip"><span class="agent-mark am-claude" style="width:16px;height:16px;font-size:9px;margin:0">✻</span>Claude</div><div class="chip"><span class="agent-mark am-cursor" style="width:16px;height:16px;font-size:9px;margin:0">◈</span>Cursor</div>
+    </div>
+    <div class="section-label">Pinned</div>
+    <div class="ws-row"><span class="agent-mark am-codex">C</span><div class="body"><div class="ws-title">Update icon size</div><div class="ws-sub">orbix-server<span class="sep">·</span><span class="check">✓ Passed</span><span class="sep">·</span><span class="diff-add">+8</span> <span class="diff-del">-23</span></div></div></div>
+    <div class="divider"></div>
+    <div class="ws-row"><span class="agent-mark am-claude">✻</span><div class="body"><div class="ws-title">Animation regression investigation</div><div class="ws-sub">orbix-web<span class="sep">·</span>No Changes</div></div></div>
+    <div class="section-label">Today</div>
+    <div class="ws-row"><span class="agent-mark am-cursor">◈</span><div class="body"><div class="ws-title">Fix input overflow handling</div><div class="ws-sub">orbix-app<span class="sep">·</span><span class="dot work pulse" style="display:inline-block;width:6px;height:6px"></span><span class="status-working">Working…</span></div></div></div>
+    <div class="divider"></div>
+    <div class="ws-row"><span class="agent-mark am-codex">C</span><div class="body"><div class="ws-title">Add transcription demo</div><div class="ws-sub">orbix-server<span class="sep">·</span><span class="check">✓ Passed</span><span class="sep">·</span><span class="diff-add">+800</span> <span class="diff-del">-150</span></div></div></div>
+    <div class="divider"></div>
+    <div class="ws-row"><span class="agent-mark am-claude">✻</span><div class="body"><div class="ws-title">Update working animation duration</div><div class="ws-sub">orbix-web<span class="sep">·</span><span class="check">✓ Passed</span><span class="sep">·</span><span class="diff-add">+1</span> <span class="diff-del">-1</span></div></div></div>
+  </div>
+  <div class="composer-wrap"><div class="composer"><div class="plus">＋</div><span class="ph">Plan, ask, build…</span><div class="mic">🎙</div></div></div>
+</div></div>
+</body></html>

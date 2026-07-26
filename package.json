@@ -1,0 +1,22 @@
+{
+  "name": "orbix",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Orbix — remote control for Codex / Claude Code / Cursor Agent CLI from Android & Web",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/relay",
+    "packages/web"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w @orbix/server",
+    "dev:web": "npm run dev -w @orbix/web",
+    "build": "npm run build -w @orbix/shared && npm run build -w @orbix/web && npm run build -w @orbix/server",
+    "start": "node packages/server/dist/index.js",
+    "test": "npm run test -w @orbix/shared && npm run test -w @orbix/server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

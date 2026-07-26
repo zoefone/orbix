@@ -1,0 +1,59 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+.sheet-mask { position: absolute; inset: 0; background: rgba(0,0,0,.4); display: flex; flex-direction: column; justify-content: flex-end; }
+.sheet { background: var(--bg); border-radius: 28px 28px 0 0; padding: 12px 20px 30px; }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--ink3); margin: 0 auto 16px; opacity: .5; }
+.sheet-row { display: flex; align-items: center; gap: 14px; padding: 15px 6px; font-size: 16px; }
+.sheet-row .sh-ic { width: 40px; height: 40px; border-radius: 12px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--ink); }
+.attach-chip { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px 8px 8px; margin: 0 0 8px; }
+.attach-thumb { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg,#888,#ccc); flex: none; }
+.attach-thumb.doc { display: flex; align-items: center; justify-content: center; font-size: 17px; background: var(--card2); color: var(--ink2); }
+.attach-name { font-size: 14px; font-weight: 500; } .attach-size { font-size: 12px; color: var(--ink2); margin-top: 1px; }
+.attach-x { margin-left: auto; color: var(--ink3); padding: 6px; }
+.notif { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 13px 15px; margin: 8px 0; box-shadow: 0 4px 18px rgba(0,0,0,.10); }
+.notif .n-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink2); font-weight: 600; letter-spacing: .02em; }
+.notif .n-logo { width: 20px; height: 20px; border-radius: 6px; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.notif .n-time { margin-left: auto; font-weight: 400; }
+.notif .n-title { font-size: 15px; font-weight: 600; margin-top: 7px; }
+.notif .n-body { font-size: 13.5px; color: var(--ink2); margin-top: 2px; line-height: 1.4; }
+.n-btns { display: flex; gap: 8px; margin-top: 10px; }
+.n-btn { flex: 1; text-align: center; background: var(--card2); border-radius: 999px; padding: 8px 0; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.ongoing { display: flex; align-items: center; gap: 10px; }
+.prog { flex: 1; height: 4px; border-radius: 2px; background: var(--card2); overflow: hidden; margin-top: 8px; }
+.prog i { display: block; height: 100%; width: 55%; background: var(--accent); border-radius: 2px; }
+</style></head><body>
+<div class="stage"><div class="stage-label">Attach sheet + chips — Light</div><div class="phone theme-light">
+  <div class="statusbar"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div class="navbar"><div class="icon-btn plain">‹</div><div class="nav-title">Update icon size</div><div class="icon-btn plain">···</div></div>
+  <div class="scroll"><div style="background:var(--bubble);border-radius:20px;padding:12px 16px;font-size:16px;margin:10px 0 10px 32px">Use this screenshot as reference for the new layout.</div>
+    <div class="attach-chip"><div class="attach-thumb"></div><div><div class="attach-name">layout-ref.png</div><div class="attach-size">412 KB · image</div></div><div class="attach-x">✕</div></div>
+    <div class="attach-chip"><div class="attach-thumb doc">📄</div><div><div class="attach-name">requirements.md</div><div class="attach-size">8 KB · file</div></div><div class="attach-x">✕</div></div>
+  </div>
+  <div class="sheet-mask"><div class="sheet"><div class="grab"></div>
+    <div class="sheet-row"><div class="sh-ic">🖼</div>Photo Library</div>
+    <div class="sheet-row"><div class="sh-ic">📷</div>Take Photo</div>
+    <div class="sheet-row"><div class="sh-ic">📁</div>Choose File</div>
+  </div></div>
+</div></div>
+<div class="stage"><div class="stage-label">Notifications — Dark</div><div class="phone theme-dark" style="background:#000">
+  <div class="statusbar" style="color:#fff"><span>9:41</span><span class="right">●●●●● ▲▲▲ 100%</span></div>
+  <div style="padding:60px 16px 0">
+    <div class="notif theme-dark">
+      <div class="n-head"><div class="n-logo">◍</div>ORBIX · dev-server<span class="n-time">now</span></div>
+      <div class="n-title">⚠ Approval needed — Fix input overflow</div>
+      <div class="n-body">Cursor Agent wants to run: git push origin fix/overflow</div>
+      <div class="n-btns"><div class="n-btn">Approve</div><div class="n-btn">Deny</div></div>
+    </div>
+    <div class="notif theme-dark">
+      <div class="n-head"><div class="n-logo">◍</div>ORBIX · dev-server<span class="n-time">2m</span></div>
+      <div class="n-title">✓ Task finished — Update icon size</div>
+      <div class="n-body">Codex completed with 3 file changes (+8 -23)</div>
+    </div>
+    <div class="notif theme-dark">
+      <div class="n-head"><div class="n-logo">◍</div>ORBIX<span class="n-time">ongoing</span></div>
+      <div class="n-title">Claude is working…</div>
+      <div class="n-body ongoing">Animation regression investigation</div>
+      <div class="prog"><i></i></div>
+    </div>
+  </div>
+</div></div>
+</body></html>
